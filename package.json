@@ -1,0 +1,36 @@
+{
+  "name": "marmot",
+  "version": "0.2.1",
+  "description": "A platform for parse freemarker and velocity template",
+  "bin": {
+    "marmot": "bin/marmot.js"
+  },
+  "scripts": {
+    "prepublish": "babel -d ./ src/",
+    "dev": "babel --watch -d ./ src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:evan2x/node-marmot.git"
+  },
+  "author": "evan2x",
+  "license": "MIT",
+  "dependencies": {
+    "babel-core": "^5.8.22",
+    "chalk": "^1.1.0",
+    "cheerio": "^0.19.0",
+    "commander": "^2.8.1",
+    "del": "^1.2.1",
+    "inquirer": "^0.9.0",
+    "mkdirp": "^0.5.1",
+    "pretty-data": "^0.40.0",
+    "tar": "^2.1.1"
+  },
+  "engines": {
+    "node": ">=0.12"
+  },
+  "_server": "http://10.100.142.113:8009/tomcat.tar.gz",
+  "_freemarker": "http://10.100.142.113:8009/freemarker.tar.gz",
+  "_velocity": "http://10.100.142.113:8009/velocity.tar.gz",
+  "_marmot": "http://10.100.142.113:8009/WEB-INF.tar.gz"
+}
