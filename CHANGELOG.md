@@ -2,6 +2,15 @@
 
 ---
 
+# v0.3.0
+
+* 修改`server`子命令的`-r, --remove`参数为`-d, --delete`用于根据service名删除对应的service配置
+* `server`子命令增加`-r, --restart`参数用于重启服务
+* 修复`init`子命令在初始化配置模板引擎未生效的bug
+* 梳理启动tomcat的检查顺序
+* 修复tomcat在启动时候出现同样端口的bug
+* 增加读取`server.xml`的方法
+
 # v0.2.1
 
 * 调整`server`子命令的`-r, --remove`参数在未找到service情况下的提示信息
