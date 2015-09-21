@@ -6,8 +6,6 @@
 
 一个解析Freemarker或者velocity模板的平台。
 
-**目前项目外网不可用，因为环境需要依赖部分内网的一些jar包，暂未托管至npm上**
-
 ## Install
 
 由于目前并没有发布至`npm`上，所以目前安装此工具需要使用以下方式
@@ -60,10 +58,11 @@ $ marmot server
 
 * `-s, --start` 启动tomcat服务器，默认的端口是`8080`
 * `-S, --stop` 停止tomcat服务器
+* `-r, --restart` 重启tomcat服务器
 * `-p, --port 8081` 指定端口号，该参数只在`-s, --start`参数的情况下有效
 * `-c, --clean` 清理掉本地的tomcat服务器
 * `-l, --list` 显示已经添加的tomcat service列表
-* `-r, --remove TouMi-WebApp` 根据service的名称移除对应的service，你可以使用`marmot server -l`来查看当前的service列表，第一列就是service的名称，通常情况下它和你的项目名是一致的
+* `-d, --delete TouMi-WebApp` 根据service的名称移除对应的service，你可以使用`marmot server -l`来查看当前的service列表，第一列就是service的名称，通常情况下它和你的项目名是一致的
 
 #### Example
 
