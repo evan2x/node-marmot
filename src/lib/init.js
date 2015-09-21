@@ -86,7 +86,7 @@ function initWebXML(answers) {
          * 载入web.xml文件
          * @type {Object}
          */
-        $ = cheerio.load(fs.readFileSync(WEB_XML_PATH).toString(), {
+        $ = cheerio.load(fs.readFileSync(WEB_XML_PATH, 'utf-8'), {
             normalizeWhitespace: true,
             xmlMode: true
         }),
@@ -117,9 +117,9 @@ function initWebXML(answers) {
             });
             $(FILTER_MAPPING_TAG).last().after(servlet);
 
-            // 创建velocity配置文件
             let vconf = tmpl.velocity(answers);
             fs.writeFileSync(VELOCITY_PATH, vconf);
+            fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
         });
     }
 
@@ -136,11 +136,9 @@ function initWebXML(answers) {
             });
 
             $(FILTER_MAPPING_TAG).last().after(servlet);
+            fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
         });
     }
-    
-    // 更新web.xml文件
-    fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
 }
 
 /**
