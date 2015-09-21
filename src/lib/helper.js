@@ -11,9 +11,9 @@ import url from 'url';
 import os from 'os';
 import zlib from 'zlib';
 
-
 import chalk from 'chalk';
 import tar from 'tar';
+import { pd } from 'pretty-data';
 import cheerio from 'cheerio';
 
 import {
@@ -126,6 +126,25 @@ function readServerFile(){
 }
 
 /**
+ * 对tomcat的server.xml文件写入数据
+ * @param  {String<XML>} data
+ * @return {Promise}
+ */
+function writeServerFile(data){
+    return new Promise((resolve, reject) => {
+        fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), err => {
+            if(err){
+                reject(err);
+                return;
+            }
+
+            resolve();
+        });
+    });
+}
+
+
+/**
  * 序列化为web.xml格式的参数配置
  * @param  {Object} params 参数表
  * @return {String}
@@ -182,7 +201,7 @@ function printTables(tables = {
          * @param {Array}
          * @return {String}
          */
-        convert = (arr) => {
+        convert = arr => {
             let str = '|';
             arr.forEach((v, i) => {
                 placeholder = space.repeat(max[i] - v.length);
@@ -218,8 +237,25 @@ function printTables(tables = {
     process.stdout.write(output);
 }
 
+/**
+ * 检查参数的互斥性
+ * @param  {Array} params 参数列表
+ * @return {Boolean}
+ */
+function checkParamsMutex(params){
+    let count = 0;
+    for(let i = 0; i < params.length; i++){
+        if(params[i]){
+            count ++;
+        }
+    }
+
+    return count > 1;
+}
+
 export {
     download, untargz, readRCFile,
-    readServerFile, serializeXMLParams, isWin,
-    printTables
+    readServerFile, writeServerFile,
+    serializeXMLParams, isWin,
+    printTables, checkParamsMutex
 }
