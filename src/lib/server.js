@@ -11,7 +11,6 @@ import os from 'os';
 import net from 'net';
 import { spawn } from 'child_process';
 
-import { pd } from 'pretty-data';
 import chalk from 'chalk';
 import del from 'del';
 
@@ -113,12 +112,18 @@ function execCatalinaScript(name){
  * @return {Promise}
  */
 function startTomcat(opts = {}){
-    let
+    let options = path.parse(CWD),
+        $ = _.readServerFile(),
+        // 匹配服务是否存在
+        service = $(`Service[name="${options.base}"]`),
+        // 匹配已使用指定端口的connector
+        connector = $(`Connector[port="${opts.port}"]`, 'Service'),
+
         /**
          * 使用tomcat自带脚本启动server
+         * @return {Promise}
          */
         startup = () => {
-
             return new Promise((resolve, reject) => {
                 let command = execCatalinaScript('start');
 
@@ -139,19 +144,69 @@ function startTomcat(opts = {}){
         },
 
         /**
-         * 检查service配置，两种情况:
-         * 1.存在同名的service，只修改port
-         * 2.创建全新的service
+         * 检查端口是否被占用
          * @return {Promise}
          */
-        checkService = () => {
-
+        checkPort = () => {
             return new Promise((resolve, reject) => {
-                let options = path.parse(CWD),
-                    $ = _.readServerFile(),
-                    service = $(`Service[name="${options.base}"]`);
+                let portExists = chalk.red(`port [${opts.port}] is already in use`);
+                // 检查service配置中当前端口是否被占用
+                if(connector[0] && !service.has(connector)[0]){
+                    opts.hasMessage && console.error(portExists);
+                    reject();
+                    return;
+                }
 
-                // 清理项目已经删除的相关service
+                // 使用net模块创建一个server用来测试端口是否处于可用状态
+                let sniffer = net.createServer();
+
+                sniffer.once('error', () => {
+                    // 如果端口被包含在当前服务中，提示为当前服务已占用此端口
+                    if(service.has(connector)[0]){
+                        opts.hasMessage && console.error(chalk.red(`the current service is already using port [${opts.port}]`));
+                    } else {
+                        opts.hasMessage && console.error(portExists);
+                    }
+                    reject();
+                });
+
+                sniffer.once('close', resolve);
+                sniffer.listen(opts.port, sniffer.close);
+            });
+        },
+
+        /**
+         * 设置端口号
+         * @todo 如果指定端口号与当前服务所使用的端口号一致则不设置
+         * @return {Promise}
+         */
+        setPort = () => {
+            return new Promise((resolve, reject) => {
+
+                if(!opts.port || service.has(connector)[0]){
+                    resolve();
+                    return;
+                }
+
+                if(service[0]){
+                    service.find('Connector').attr('port', opts.port);
+                } else {
+                    $('Server').append(tmpl.service({
+                        name: options.base,
+                        dir: options.dir,
+                        port: opts.port
+                    }));
+                }
+                _.writeServerFile($.html()).then(resolve).catch(reject);
+            });
+        },
+
+        /**
+         * 清理项目已经删除的相关service
+         * @return {Promise}
+         */
+        cleanService = () => {
+            return new Promise((resolve, reject) => {
                 $('Service').each((index, item) => {
                     let $item = $(item),
                         docBase = $item.find('Context').attr('docBase') || '',
@@ -162,63 +217,15 @@ function startTomcat(opts = {}){
                     }
                 });
 
-                // service已经存在的情况下只调整port
-                if(service[0]){
-                    service.find('Connector').attr('port', opts.port);
-
-                // 生成一个service配置
-                } else {
-                    // 没有端口的情况下不创建Service
-                    if(!opts.port){
-                        resolve();
-                        return;
-                    }
-                    //检查server.xml是否有重复的端口号
-                    if($(`Connector[port="${opts.port}"]`, 'Service')[0]){
-                        opts.hasMessage && console.error(chalk.red('port already in use'));
-                        reject();
-                        return;
-                    }
-
-                    $('Server').append(tmpl.service({
-                        name: options.base,
-                        dir: options.dir,
-                        port: opts.port
-                    }));
-                }
-
-                // 重写server.xml文件
-                fs.writeFile(SERVER_CONFIG_PATH, pd.xml($.html()), err => {
-
-                    if(err) reject(err);
-                    resolve();
-                });
-            });
-        },
-        /**
-         * 使用node net模块创建一个server用来测试端口是否处于可用状态
-         * @return {Promise}
-         */
-        checkPort = () => {
-            return new Promise((resolve, reject) => {
-                let sniffer = net.createServer();
-
-                sniffer.on('error', () => {
-                    opts.hasMessage && console.error(chalk.red('port already in use'));
-                    reject();
-                });
-
-                sniffer.once('close', resolve);
-                sniffer.listen(opts.port, sniffer.close);
+                _.writeServerFile($.html()).then(resolve).catch(reject);
             });
         };
 
     return (
         checkPort()
-        .then(checkService)
-        .then(() => {
-            return stopTomcat();
-        })
+        .then(setPort)
+        .then(stopTomcat)
+        .then(cleanService)
         .then(startup)
     );
 }
@@ -280,7 +287,7 @@ function showServices(){
  * 根据端口号删除对应的service
  * @param  {String} port
  */
-function removeServiceByName(name){
+function deleteServiceByName(name){
     if(typeof name === 'boolean'){
         return;
     }
@@ -302,13 +309,10 @@ function removeServiceByName(name){
         return;
     }
 
-    fs.writeFile(SERVER_CONFIG_PATH, pd.xml($.html()), err => {
-        if(err){
-            console.error(err);
-            return;
-        }
-
+    _.writeServerFile($.html())
+    .then(() => {
         console.log(chalk.green('remove the service successfully'));
+
         if(fs.existsSync(TOMCAT_START_IDENTIFIER)){
             startTomcat();
         }
@@ -316,19 +320,25 @@ function removeServiceByName(name){
 }
 
 export default options => {
-    // 是否同时存在-s, --start和-S, --stop两个参数
-    if(options.start && options.stop){
-        console.log(chalk.red('\'-s, --start\' and \'-S, --stop\' are mutually exclusive'));
+    // 检查启动，停止以及重启是否有两个以上参数同时存在
+    if(_.checkParamsMutex([
+        options.start,
+        options.stop,
+        options.restart])
+    ){
+        console.error(chalk.red('\'-s, --start\', \'-S, --stop\', \'-r, --restart\' are mutually exclusive'));
         return;
     }
 
+    // 打印已配置的服务列表
     if(options.list){
         showServices();
         return;
     }
 
-    if(options.remove){
-        removeServiceByName(options.remove);
+    // 根据服务的名称删除相关的配置项
+    if(options.delete){
+        deleteServiceByName(options.delete);
         return;
     }
 
@@ -340,15 +350,24 @@ export default options => {
         });
     }
 
-    if(options.start || options.stop){
+    if(options.start || options.stop || options.restart){
         Promise.resolve(clean)
         .then(checkJDK)
         .then(checkTomcat)
         .then(() => {
             if(options.start){
-                startTomcat({hasMessage: true, port: options.port});
+                startTomcat({
+                    hasMessage: true,
+                    port: options.port
+                });
             } else if(options.stop){
                 stopTomcat({hasMessage: true});
+            } else if(options.restart){
+                stopTomcat()
+                .then(startTomcat)
+                .then(() => {
+                    console.log(chalk.green('tomcat server restart successfully'));
+                });
             }
         });
     }
