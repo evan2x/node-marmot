@@ -1,7 +1,5 @@
 # Marmot ChangeLog
 
----
-
 # v0.3.0
 
 * 修改`server`子命令的`-r, --remove`参数为`-d, --delete`用于根据service名删除对应的service配置
