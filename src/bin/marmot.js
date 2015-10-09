@@ -30,7 +30,7 @@ program
     .option('-r, --restart', 'restart the tomcat server')
     .option('-c, --clean', 'cleanup the tomcat server')
     .option('-l, --list', 'list of tomcat services')
-    .option('-d, --delete [name]', 'delete the service by [name]')
+    .option('-d, --delete [port]', 'delete the service by [port]')
     .action(server);
 
 program.parse(process.argv);

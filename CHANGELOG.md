@@ -1,5 +1,10 @@
 # Marmot ChangeLog
 
+# v0.3.1
+
+* 修改`marmot server`中参数`-d, --delete`以端口号删除service
+* 开放至公网，将依赖的`tar.gz`文件放到`http://www.codershow.com`
+
 # v0.3.0
 
 * 修改`server`子命令的`-r, --remove`参数为`-d, --delete`用于根据service名删除对应的service配置

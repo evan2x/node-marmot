@@ -5,6 +5,8 @@
  * @date  2015/07/27
  */
 
+/* eslint-disable no-console */
+
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -287,19 +289,19 @@ function showServices(){
  * 根据端口号删除对应的service
  * @param  {String} port
  */
-function deleteServiceByName(name){
-    if(typeof name === 'boolean'){
+function deleteServiceByPort(port){
+    if(typeof port === 'boolean'){
         return;
     }
 
     let $ = _.readServerFile(),
         hasExist = false;
 
-    $('Service').each((index, item) => {
+    $('Connector', 'Service').each((index, item) => {
         let $item = $(item);
-        if($item.attr('name') === name){
+        if($item.attr('port') === port){
             hasExist = true;
-            $item.remove();
+            $item.parent().remove();
             return false;
         }
     });
@@ -336,14 +338,14 @@ export default options => {
         return;
     }
 
-    // 根据服务的名称删除相关的配置项
+    // 根据服务的端口号删除相关的配置项
     if(options.delete){
-        deleteServiceByName(options.delete);
+        deleteServiceByPort(options.delete);
         return;
     }
 
     let clean = null;
-    // 存在-c, --clean的话删除掉已下载的tomcat并停止tomcat进程
+    // 存在-c, --clean的话停止tomcat进程并删除已下载的tomcat
     if(options.clean){
         clean = stopTomcat().then(() => {
             return del(TOMCAT_PATH, {force: true});

@@ -6,12 +6,10 @@
 
 ## Install
 
-由于目前并没有发布至`npm`上，所以目前安装此工具需要使用以下方式
-
 #### Mac/Linux
 
 ```bash
-sudo npm install -g git+http://10.100.142.113/evan2x/marmot.git
+sudo npm install -g marmot
 ```
 
 #### Windows
@@ -19,7 +17,7 @@ sudo npm install -g git+http://10.100.142.113/evan2x/marmot.git
 > windows下您需要在管理员模式下安装
 
 ```bash
-npm install -g git+http://10.100.142.113/evan2x/marmot.git
+npm install -g marmot
 ```
 
 ## Usage
@@ -60,7 +58,7 @@ $ marmot server
 * `-p, --port 8081` 指定端口号，该参数只在`-s, --start`参数的情况下有效
 * `-c, --clean` 清理掉本地的tomcat服务器
 * `-l, --list` 显示已经添加的tomcat service列表
-* `-d, --delete TouMi-WebApp` 根据service的名称移除对应的service，你可以使用`marmot server -l`来查看当前的service列表，第一列就是service的名称，通常情况下它和你的项目名是一致的
+* `-d, --delete 8080` 根据service的端口移除对应的service，你可以使用`marmot server -l`来查看当前已存在的service列表
 
 #### Example
 
