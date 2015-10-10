@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# v0.3.2
+
+* 修复`marmot server -d [port]`命令在未找到端口号匹配的service时，执行错误的问题
+
 # v0.3.1
 
 * 修改`marmot server`中参数`-d, --delete`以端口号删除service
