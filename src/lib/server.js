@@ -307,7 +307,7 @@ function deleteServiceByPort(port){
     });
 
     if(!hasExist){
-        console.error(chalk.red(`service "${name}" is not found`));
+        console.error(chalk.red(`port "${port}" is not found`));
         return;
     }
 
