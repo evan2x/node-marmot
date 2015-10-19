@@ -159,15 +159,15 @@ function otherConfiguration($, answers) {
 
         switch ($item.children(FILTER_NAME_TAG).text()) {
 
-        case REWRITE_FILTER:
-            $item.append(_.serializeXMLParams({
-                routerFile: answers.router
-            }));
-            break;
-        case MOCK_FILTER:
-            $item.append(_.serializeXMLParams({
-                mockDir: answers.mock
-            }));
+            case REWRITE_FILTER:
+                $item.append(_.serializeXMLParams({
+                    routerFile: answers.router
+                }));
+                break;
+            case MOCK_FILTER:
+                $item.append(_.serializeXMLParams({
+                    mockDir: answers.mock
+                }));
         }
     });
 
