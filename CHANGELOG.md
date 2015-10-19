@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# v0.3.3
+
+* 当JAVA的环境变量 `JAVA_HOME` 或者 `JRE_HOME` 全部未设置的时候，给出错误提示
+
 # v0.3.2
 
 * 修复`marmot server -d [port]`命令在未找到端口号匹配的service时，执行错误的问题
