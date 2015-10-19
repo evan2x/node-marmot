@@ -28,7 +28,7 @@ import {
 } from './constant';
 
 /**
- * 检查JDK是否安装
+ * 检查JDK是否安装及检测JAVA_HOME或者JRE_HOME环境变量是否已设置
  * @return {Promise}
  */
 function checkJDK() {
@@ -38,18 +38,25 @@ function checkJDK() {
         let jdk = spawn('java', ['-version']),
             version = null,
             fail = () => {
-                console.error(chalk.red('Please installing the JDK Software and Setting Environment Variables'));
+                console.error(chalk.red('Please installing the JDK Software'));
                 process.exit(1);
                 reject();
             };
-
 
         jdk.stderr.on('data', data => {
             let ret = data.toString().match(regex);
             if(!version && ret){
                 version = ret[0];
                 console.log('JVM version: %s', version);
-                resolve();
+                if(process.env.JAVA_HOME || process.env.JRE_HOME){
+                    resolve();
+
+                // JAVA_HOME与JRE_HOME全部都未设置时给予用户错误提示
+                } else {
+                    console.error(chalk.red('Neither the JAVA_HOME nor the JRE_HOME environment variable is defined'));
+                    console.error(chalk.red('At least one of these environment variable is needed to run this program'));
+                    reject();
+                }
             }
         });
 
