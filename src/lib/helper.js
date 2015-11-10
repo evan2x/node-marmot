@@ -223,8 +223,6 @@ export function printTables(tables = {
             );
         };
 
-    console.log(list);
-
     list.forEach(item => {
         max = item.map((v, i) => max[i] ? Math.max(max[i], v.length) : v.length);
     });
