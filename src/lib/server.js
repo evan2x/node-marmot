@@ -328,7 +328,7 @@ function deleteServiceByPort(port){
     });
 }
 
-export default options => {
+export default function(options) {
     // 检查启动，停止以及重启是否有两个以上参数同时存在
     if(_.checkParamsMutex([
         options.start,

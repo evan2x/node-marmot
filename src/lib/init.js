@@ -158,7 +158,7 @@ function otherConfiguration($, answers) {
         let $item = $(item);
 
         switch ($item.children(FILTER_NAME_TAG).text()) {
-
+            /* eslint-disable */
             case REWRITE_FILTER:
                 $item.append(_.serializeXMLParams({
                     routerFile: answers.router
@@ -168,6 +168,7 @@ function otherConfiguration($, answers) {
                 $item.append(_.serializeXMLParams({
                     mockDir: answers.mock
                 }));
+            /* eslint-enable */
         }
     });
 
@@ -209,12 +210,12 @@ export default options => {
 
             // velocity questions
             if( ~engines.indexOf('velocity') ){
-                subq = subq.concat(q.velocity);
+                subq = [...subq, ...q.velocity];
             }
 
             // freemarker questions
             if( ~engines.indexOf('freemarker') ){
-                subq = subq.concat(q.freemarker);
+                subq = [...subq, ...q.freemarker];
             }
 
             if( subq.length > 0 ){

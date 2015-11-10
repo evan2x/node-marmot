@@ -19,7 +19,7 @@ export let common = [
             'velocity',
             'freemarker'
         ],
-        validate (input) {
+        validate(input) {
             if( input.length > 0 ){
                 this.async()(true);
             }
@@ -52,7 +52,7 @@ export let common = [
         message: 'Enter the router file(it must be .xml):',
         'default': '/router/main.xml',
         type: 'input',
-        validate (input) {
+        validate(input) {
             if(~input.lastIndexOf('.xml')){
                 this.async()(true);
             }

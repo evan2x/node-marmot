@@ -24,7 +24,7 @@ import {
     SERVER_CONFIG_PATH
 } from './constant';
 
-function download(src = '', target = CWD){
+export function download(src = '', target = CWD){
     let size = 0,
         chunkedSize = 0,
         options = url.parse(src),
@@ -78,7 +78,7 @@ function download(src = '', target = CWD){
  * @param {String} opts.target 解压到指定目录
  * @param {Number} opts.strip
  */
-function untargz(opts){
+export function untargz(opts){
     return new Promise((resolve, reject) => {
         fs.createReadStream(opts.pack)
             .pipe(zlib.createGunzip())
@@ -103,7 +103,7 @@ function untargz(opts){
  * 读取marmot的配置文件
  * @return {Object}
  */
-function readRCFile(){
+export function readRCFile(){
     if(!fs.existsSync(CONFIG_PATH)){
         console.error(chalk.red('.marmotrc file not found, please run <marmot init>'));
     }
@@ -114,7 +114,7 @@ function readRCFile(){
  * 读取tomcat的server.xml文件
  * @return {Object}
  */
-function readServerFile(){
+export function readServerFile(){
     let config = '';
 
     if(fs.existsSync(SERVER_CONFIG_PATH)){
@@ -132,7 +132,7 @@ function readServerFile(){
  * @param  {String<XML>} data
  * @return {Promise}
  */
-function writeServerFile(data){
+export function writeServerFile(data){
     return new Promise((resolve, reject) => {
         fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), err => {
             if(err){
@@ -151,7 +151,7 @@ function writeServerFile(data){
  * @param  {Object} params 参数表
  * @return {String}
  */
-function serializeXMLParams(params) {
+export function serializeXMLParams(params) {
     let fragment = '';
     for(let key in params){
         if(params.hasOwnProperty(key)){
@@ -168,7 +168,7 @@ function serializeXMLParams(params) {
  * 检测是否为windows平台
  * @return {Boolean}
  */
-function isWin(){
+export function isWin(){
     let platform = os.platform();
 
     if(platform === 'win32' || platform === 'win64'){
@@ -189,7 +189,7 @@ function isWin(){
  *     ]
  * }
  */
-function printTables(tables = {
+export function printTables(tables = {
     head: [],
     body: []
 }){
@@ -197,7 +197,7 @@ function printTables(tables = {
         output = '',
         placeholder = '',
         max = [],
-        list = [tables.head].concat(tables.body),
+        list = [...tables.head, ...tables.body],
         /**
          * 将传入的数组转化为一行数据
          * @param {Array}
@@ -244,7 +244,7 @@ function printTables(tables = {
  * @param  {Array} params 参数列表
  * @return {Boolean}
  */
-function checkParamsMutex(params){
+export function checkParamsMutex(params){
     let count = 0;
     for(let i = 0; i < params.length; i++){
         if(params[i]){
@@ -254,10 +254,3 @@ function checkParamsMutex(params){
 
     return count > 1;
 }
-
-export {
-    download, untargz, readRCFile,
-    readServerFile, writeServerFile,
-    serializeXMLParams, isWin,
-    printTables, checkParamsMutex
-};
