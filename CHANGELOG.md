@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# v0.3.6
+
+* 移除 `console.log`
+
 # v0.3.5
 
 * 修复 `marmot server -l` 报错的 `bug`
