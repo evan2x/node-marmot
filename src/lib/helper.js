@@ -197,7 +197,7 @@ export function printTables(tables = {
         output = '',
         placeholder = '',
         max = [],
-        list = [...tables.head, ...tables.body],
+        list = [tables.head, ...tables.body],
         /**
          * 将传入的数组转化为一行数据
          * @param {Array}
@@ -222,6 +222,8 @@ export function printTables(tables = {
                 '|\n'
             );
         };
+
+    console.log(list);
 
     list.forEach(item => {
         max = item.map((v, i) => max[i] ? Math.max(max[i], v.length) : v.length);
