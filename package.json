@@ -1,6 +1,6 @@
 {
   "name": "marmot",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "A platform for parse freemarker and velocity template",
   "bin": {
     "marmot": "bin/marmot.js"
