@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# v0.3.4
+
+* 优化代码中使用的 `ECMAScript 2015` 语法
+
 # v0.3.3
 
 * 当JAVA的环境变量 `JAVA_HOME` 或者 `JRE_HOME` 全部未设置的时候，给出错误提示
