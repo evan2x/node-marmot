@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# v0.3.5
+
+* 修复 `marmot server -l` 报错的 `bug`
+
 # v0.3.4
 
 * 优化代码中使用的 `ECMAScript 2015` 语法
