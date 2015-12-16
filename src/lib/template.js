@@ -12,13 +12,13 @@ import * as _ from './helper';
  * @return {String}
  */
 function freemarker(params) {
-    return _.serializeXMLParams({
-        tag_syntax: params.tagSyntax,
-        TemplatePath: params.template,
-        template_update_delay: 0,
-        NoCache: true,
-        default_encoding: params.encoding
-    });
+  return _.serializeXMLParams({
+    tag_syntax: params.tagSyntax,
+    TemplatePath: params.template,
+    template_update_delay: 0,
+    NoCache: true,
+    default_encoding: params.encoding
+  });
 }
 
 /**
@@ -28,7 +28,7 @@ function freemarker(params) {
  */
 export function velocity(params) {
 
-    return (
+  return (
 `input.encoding = ${params.encoding}
 output.encoding = ${params.encoding}
 resource.loader = webapp
@@ -37,7 +37,7 @@ webapp.resource.loader.path = /${params.template}
 webapp.resource.loader.cache = false
 webapp.resource.loader.modificationCheckInterval = 0
 tools.view.servlet.layout.directory = /`
-    );
+  );
 
 }
 
@@ -46,15 +46,15 @@ tools.view.servlet.layout.directory = /`
  * @type {String}
  */
 export let router = (
-    `<?xml version="1.0" encoding="UTF-8"?>
-      <router>
-      <router-map>
-        <!-- 路由配置，uri：访问地址，target：目标文件 -->
-        <!-- <route uri="/" target="/index.vm"/> -->
-      </router-map>
-      <!-- 使用import 引入其他的router file -->
-      <!-- <import src="product.xml"/> -->
-    </router>`
+  `<?xml version="1.0" encoding="UTF-8"?>
+  <router>
+    <router-map>
+      <!-- 路由配置，uri：访问地址，target：目标文件 -->
+      <!-- <route uri="/" target="/index.vm"/> -->
+    </router-map>
+    <!-- 使用import 引入其他的router file -->
+    <!-- <import src="product.xml"/> -->
+  </router>`
 );
 
 /**
@@ -63,22 +63,22 @@ export let router = (
  * @return {String}
  */
 export function service(conf) {
-    return (
-        `<Service name="${conf.name}">
-           <Connector port="${conf.port}" protocol="HTTP/1.1"
-                       connectionTimeout="20000"
-                       redirectPort="8443"
-                       compression="on"
-                       compressionMinSize="2048"
-                       compressableMimeType="text/html,text/xml,text/css,text/plain,text/javascript,application/javascript" />
-           <Engine name="${conf.name}" defaultHost="localhost">
-             <Host name="localhost"  appBase="${conf.dir}" unpackWARs="true" autoDeploy="true">
-               <Context path="" docBase="${conf.name}" />
-               <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-             </Host>
-           </Engine>
-        </Service>`
-    );
+  return (
+    `<Service name="${conf.name}">
+       <Connector port="${conf.port}" protocol="HTTP/1.1"
+                   connectionTimeout="20000"
+                   redirectPort="8443"
+                   compression="on"
+                   compressionMinSize="2048"
+                   compressableMimeType="text/html,text/xml,text/css,text/plain,text/javascript,application/javascript" />
+       <Engine name="${conf.name}" defaultHost="localhost">
+         <Host name="localhost"  appBase="${conf.dir}" unpackWARs="true" autoDeploy="true">
+           <Context path="" docBase="${conf.name}" />
+           <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+         </Host>
+       </Engine>
+    </Service>`
+  );
 }
 
 /**
@@ -87,33 +87,39 @@ export function service(conf) {
  * @return {String}
  */
 export function servlet(params) {
-    var className = '',
-        fragment = '';
+  let className = '',
+    fragment = '';
 
-    switch(params.name) {
+  switch(params.name) {
 
-    case 'velocity':
-        fragment = _.serializeXMLParams({
-            'org.apache.velocity.properties': '/WEB-INF/velocity.properties'
-        });
-        className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
-        break;
-
-    case 'freemarker':
-        fragment = freemarker(params);
-        className = 'freemarker.ext.servlet.FreemarkerServlet';
-        break;
+  case 'velocity':
+    let props = {
+      'org.apache.velocity.properties': '/WEB-INF/velocity.properties'
     }
 
-    return (
-        `<servlet>
-          <servlet-name>${params.name}</servlet-name>
-          <servlet-class>${className}</servlet-class>
-          ${fragment}
-        </servlet>
-        <servlet-mapping>
-          <servlet-name>${params.name}</servlet-name>
-          <url-pattern>*${params.suffix}</url-pattern>
-        </servlet-mapping>`
-    );
+    if(params.toolbox){
+      props['org.apache.velocity.toolbox'] = params.toolbox;
+    }
+    
+    fragment = _.serializeXMLParams(props);
+    className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
+    break;
+
+  case 'freemarker':
+    fragment = freemarker(params);
+    className = 'freemarker.ext.servlet.FreemarkerServlet';
+    
+  }
+
+  return (
+    `<servlet>
+      <servlet-name>${params.name}</servlet-name>
+      <servlet-class>${className}</servlet-class>
+      ${fragment}
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>${params.name}</servlet-name>
+      <url-pattern>*${params.suffix}</url-pattern>
+    </servlet-mapping>`
+  );
 }

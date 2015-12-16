@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/badge/node.js->=_0.12-brightgreen.svg?style=flat-square)]()
 
-一个解析Freemarker或者velocity模板的平台。
+一个解析velocity或者freemarker模板的平台。
 
 ## Install
 

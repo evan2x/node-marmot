@@ -1,7 +1,7 @@
 ecmaFeatures:
   modules: true
 rules:
-  indent: [2, 4]
+  indent: [2, 2]
   quotes: [2, single]
   block-scoped-var: 2
   guard-for-in: 1
@@ -16,7 +16,7 @@ rules:
   no-native-reassign: 2
   no-new-func: 2
   no-new: 0
-  no-console: 1
+  no-console: 0
   no-debugger: 1
   no-new-wrappers: 2
   no-proto: 2

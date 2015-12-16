@@ -19,56 +19,52 @@ import { pd } from 'pretty-data';
 import cheerio from 'cheerio';
 
 import {
-    CWD,
-    CONFIG_PATH,
-    SERVER_CONFIG_PATH
-} from './constant';
+  CWD,
+  CONFIG_PATH,
+  SERVER_CONFIG_PATH
+} from './constants';
 
 export function download(src = '', target = CWD){
-    let size = 0,
-        chunkedSize = 0,
-        options = url.parse(src),
-        filename = path.basename(options.path),
-        http = options.protocol === 'https:' ? require('https') : require('http');
+  let size = 0,
+    chunkedSize = 0,
+    options = url.parse(src),
+    filename = path.basename(options.path),
+    http = options.protocol === 'https:' ? require('https') : require('http');
 
-    target = path.join(target, filename);
+  target = path.join(target, filename);
 
-    return new Promise((resolve, reject) => {
-        let client = http.get(src, res => {
-            let status = res.statusCode;
+  return new Promise((resolve, reject) => {
+    let client = http.get(src, (res) => {
+      let status = res.statusCode;
 
-            if(status === 200){
-                console.log(chalk.cyan('donwload the file from %s ...'), src);
+      if(status === 200){
+        console.log(chalk.cyan('donwload the file from %s ...'), src);
 
-                let outStream = fs.createWriteStream(target);
-                res.on('data', data => {
-                    outStream.write(data);
-                    size += data.length;
-                    // 每下载500KB，提示一次
-                    if(size - chunkedSize > 500 * 1024){
-                        console.log(chalk.cyan('%s file downloaded %dKB.'), filename, Math.floor(size / 1024));
-                        chunkedSize = size;
-                    }
-                });
-
-                res.on('end', () => {
-                    outStream.end();
-                    console.log(
-                        chalk.green('%s file download is complete, the file total size is %dKB.'),
-                        filename,
-                        Math.floor(size / 1024)
-                    );
-                    resolve(target);
-                });
-
-                res.on('error', err => reject(err));
-            } else {
-                client.abort();
-                console.error(chalk.red('downloading error, status code: %d'), status);
-                reject(status, res.statusMessage);
-            }
+        let outStream = fs.createWriteStream(target);
+        res.on('data', (data) => {
+          outStream.write(data);
+          size += data.length;
+          // 每下载500KB，提示一次
+          if(size - chunkedSize > 500 * 1024){
+            console.log(chalk.cyan('%s file downloaded %dKB.'), filename, Math.floor(size / 1024));
+            chunkedSize = size;
+          }
         });
+
+        res.on('end', () => {
+          outStream.end();
+          console.log(chalk.green('[√] %s file download is complete, the file total size is %dKB.'), filename, Math.floor(size / 1024));
+          resolve(target);
+        });
+
+        res.on('error', (err) => reject(err));
+      } else {
+        client.abort();
+        console.error(chalk.red('[×] downloading error, status code: %d'), status);
+        reject(status, res.statusMessage);
+      }
     });
+  });
 }
 
 /**
@@ -79,24 +75,21 @@ export function download(src = '', target = CWD){
  * @param {Number} opts.strip
  */
 export function untargz(opts){
-    return new Promise((resolve, reject) => {
-        fs.createReadStream(opts.pack)
-            .pipe(zlib.createGunzip())
-            .pipe(tar.Extract({
-                path: opts.target,
-                strip: opts.strip || 0
-            }))
-            .on('error', err => {
-                if(err) console.error(chalk.red(err));
-                reject(err);
-            })
-            .on('end', () => {
-                if(fs.existsSync(opts.pack)){
-                    fs.unlinkSync(opts.pack);
-                }
-                resolve();
-            });
-    });
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(opts.pack)
+      .pipe(zlib.createGunzip())
+      .pipe(tar.Extract({
+        path: opts.target,
+        strip: opts.strip || 0
+      }))
+      .on('error', (err) => {
+        if(err) console.error(chalk.red(`[×] ${err}`));
+        reject(err);
+      })
+      .on('end', () => {
+        resolve();
+      });
+  });
 }
 
 /**
@@ -104,10 +97,10 @@ export function untargz(opts){
  * @return {Object}
  */
 export function readRCFile(){
-    if(!fs.existsSync(CONFIG_PATH)){
-        console.error(chalk.red('.marmotrc file not found, please run <marmot init>'));
-    }
-    return JSON.parse(fs.readFileSync(CONFIG_PATH));
+  if(!fs.existsSync(CONFIG_PATH)){
+    console.error(chalk.red('[×] .marmotrc file not found, please execute \'marmot init\' command'));
+  }
+  return JSON.parse(fs.readFileSync(CONFIG_PATH));
 }
 
 /**
@@ -115,16 +108,16 @@ export function readRCFile(){
  * @return {Object}
  */
 export function readServerFile(){
-    let config = '';
+  let config = '';
 
-    if(fs.existsSync(SERVER_CONFIG_PATH)){
-        config = fs.readFileSync(SERVER_CONFIG_PATH, 'utf8');
-    }
+  if(fs.existsSync(SERVER_CONFIG_PATH)){
+    config = fs.readFileSync(SERVER_CONFIG_PATH, 'utf8');
+  }
 
-    return cheerio.load(config, {
-        normalizeWhitespace: true,
-        xmlMode: true
-    });
+  return cheerio.load(config, {
+    normalizeWhitespace: true,
+    xmlMode: true
+  });
 }
 
 /**
@@ -133,16 +126,16 @@ export function readServerFile(){
  * @return {Promise}
  */
 export function writeServerFile(data){
-    return new Promise((resolve, reject) => {
-        fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), err => {
-            if(err){
-                reject(err);
-                return;
-            }
+  return new Promise((resolve, reject) => {
+    fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), (err) => {
+      if(err){
+        reject(err);
+        return;
+      }
 
-            resolve();
-        });
+      resolve();
     });
+  });
 }
 
 
@@ -152,16 +145,16 @@ export function writeServerFile(data){
  * @return {String}
  */
 export function serializeXMLParams(params) {
-    let fragment = '';
-    for(let key in params){
-        if(params.hasOwnProperty(key)){
-            fragment += `<init-param>
-                          <param-name>${key}</param-name>
-                          <param-value>${params[key]}</param-value>
-                        </init-param>`;
-        }
+  let fragment = '';
+  for(let key in params){
+    if(params.hasOwnProperty(key)){
+      fragment += `<init-param>
+                    <param-name>${key}</param-name>
+                    <param-value>${params[key]}</param-value>
+                  </init-param>`;
     }
-    return fragment;
+  }
+  return fragment;
 }
 
 /**
@@ -169,13 +162,13 @@ export function serializeXMLParams(params) {
  * @return {Boolean}
  */
 export function isWin(){
-    let platform = os.platform();
+  let platform = os.platform();
 
-    if(platform === 'win32' || platform === 'win64'){
-        return true;
-    }
+  if(platform === 'win32'){
+    return true;
+  }
 
-    return false;
+  return false;
 }
 
 /**
@@ -183,60 +176,58 @@ export function isWin(){
  * @param  {Object} tables
  * @example
  * {
- *     head: ['name', 'port', 'path'],
- *     body: [
- *         ['app', 8080, '/path/to/app']
- *     ]
+ *   head: ['name', 'port', 'path'],
+ *   body: [
+ *     ['app', 8080, '/path/to/app']
+ *   ]
  * }
  */
 export function printTables(tables = {
-    head: [],
-    body: []
+  head: [],
+  body: []
 }){
-    let space = ' ',
-        output = '',
-        placeholder = '',
-        max = [],
-        list = [tables.head, ...tables.body],
-        /**
-         * 将传入的数组转化为一行数据
-         * @param {Array}
-         * @return {String}
-         */
-        convert = arr => {
-            let str = '|';
-            arr.forEach((v, i) => {
-                placeholder = space.repeat(max[i] - v.length);
-                str += `  ${v}${placeholder}  |`;
-            });
-            return str + '\n';
-        },
-        /**
-         * 分割线
-         * @return {String}
-         */
-        divide = () => {
-            return (
-                '|' +
-                '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1) +
-                '|\n'
-            );
-        };
+  let space = ' ',
+    output = '',
+    placeholder = '',
+    max = [],
+    list = [tables.head, ...tables.body],
+    /**
+     * 将传入的数组转化为一行数据
+     * @param {Array}
+     * @return {String}
+     */
+    convert = (arr) => {
+      let str = '|';
+      arr.forEach((v, i) => {
+        placeholder = space.repeat(max[i] - v.length);
+        str += `  ${v}${placeholder}  |`;
+      });
+      return str + '\n';
+    },
+    /**
+     * 分割线
+     * @return {String}
+     */
+    divide = () => {
+      return (
+        '|' +
+        '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1) +
+        '|\n'
+      );
+    };
 
-    list.forEach(item => {
-        max = item.map((v, i) => max[i] ? Math.max(max[i], v.length) : v.length);
-    });
+  list.forEach(item => (max) = item.map((v, i) => max[i] ? Math.max(max[i], v.length) : v.length));
 
-    output += '\n';
-    output += divide();
-    output += convert(tables.head);
-    output += divide();
-    tables.body.forEach(item => {
-        output += convert(item);
-    });
-    output += divide();
+  output += '\n';
+  output += divide();
+  output += convert(tables.head);
+  output += divide();
+  tables.body.forEach((item) => {
+    output += convert(item);
+  });
+  output += divide();
 
-    process.stdout.write(output);
+  process.stdout.write(output);
 }
 
 /**
@@ -245,12 +236,12 @@ export function printTables(tables = {
  * @return {Boolean}
  */
 export function checkParamsMutex(params){
-    let count = 0;
-    for(let i = 0; i < params.length; i++){
-        if(params[i]){
-            count ++;
-        }
+  let count = 0;
+  for(let i = 0; i < params.length; i++){
+    if(params[i]){
+      count++;
     }
+  }
 
-    return count > 1;
+  return count > 1;
 }

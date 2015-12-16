@@ -1,5 +1,11 @@
 # Marmot ChangeLog
 
+#0.4.0-alpha.1
+
+* 修复`marmot server -S`关闭不掉服务的问题
+* 调整代码风格
+* 增加velocity toolbox.xml支持
+
 # v0.3.6
 
 * 移除 `console.log`

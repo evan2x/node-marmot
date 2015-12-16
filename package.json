@@ -1,12 +1,13 @@
 {
   "name": "marmot",
-  "version": "0.3.6",
-  "description": "A platform for parse freemarker and velocity template",
+  "version": "0.4.0-alpha.1",
+  "description": "A platform for velocity and freemarker template parsing",
   "bin": {
     "marmot": "bin/marmot.js"
   },
   "scripts": {
     "prepublish": "babel -d ./ src/",
+    "lint": "eslint src/",
     "dev": "babel --watch -d ./ src/"
   },
   "repository": {
@@ -31,9 +32,5 @@
   },
   "engines": {
     "node": ">=0.12"
-  },
-  "_server": "http://www.codershow.com/evan2x/tomcat.tar.gz",
-  "_freemarker": "http://www.codershow.com/evan2x/freemarker.tar.gz",
-  "_velocity": "http://www.codershow.com/evan2x/velocity.tar.gz",
-  "_marmot": "http://www.codershow.com/evan2x/marmot.tar.gz"
+  }
 }
