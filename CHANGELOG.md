@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.4.0-alpha.3
+
+* 更新版本号
+
 # 0.4.0-alpha.2
 
 * 执行 `tomcat` 脚本由原 `exec` 改为 `spawn` 执行
