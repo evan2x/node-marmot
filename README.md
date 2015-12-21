@@ -22,7 +22,7 @@ npm install -g marmot
 
 ## Usage
 
-### init command
+### init 子命令
 
 **进入项目目录下执行**
 
@@ -40,7 +40,7 @@ $ marmot init
 
 * `-f, --force` 强制重新初始化当前项目的`WEB-INF`目录
 
-### server command
+### server 子命令
 
 **进入项目目录下执行**
 
@@ -75,7 +75,7 @@ $ marmot server -s -p 8081
 $ marmot server -S
 ```
 
-## Router configure
+## 路由配置
 
 在初始化项目时，会提示您输入路由文件入口的生成位置，默认是在当前项目目录下生成`router/main.xml`，如果您需要自定义文件名，请务必使用后缀为`.xml`的文件名。
 
@@ -113,7 +113,7 @@ $ marmot server -S
 **需要注意的是`<import src="xx"/>`中，引入其他路由文件的位置是相对于当前的`main.xml`文件的位置。我们建议您将所有路由统一放在同一个目录下**
 
 
-## Mock data
+## 模拟数据
 
 目前我们把数据模拟分为两类：
 
