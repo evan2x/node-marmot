@@ -104,10 +104,10 @@ function initWebXML(answers) {
      */
     fetch = (file) => {
       return _.untargz({
-          pack: file,
-          target: LIB_PATH,
-          strip: 1
-        });
+        pack: file,
+        target: LIB_PATH,
+        strip: 1
+      });
     };
 
   configureAbout($, answers);

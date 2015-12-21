@@ -95,7 +95,7 @@ export function servlet(params) {
   case 'velocity':
     let props = {
       'org.apache.velocity.properties': '/WEB-INF/velocity.properties'
-    }
+    };
 
     if(params.toolbox){
       props['org.apache.velocity.toolbox'] = params.toolbox;
