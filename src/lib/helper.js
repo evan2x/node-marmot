@@ -15,7 +15,7 @@ import zlib from 'zlib';
 
 import chalk from 'chalk';
 import tar from 'tar';
-import { pd } from 'pretty-data';
+import {pd} from 'pretty-data';
 import cheerio from 'cheerio';
 
 import {

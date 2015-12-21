@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import net from 'net';
-import * as childProcess from 'child_process';
+import {spawn} from 'child_process';
 
 import chalk from 'chalk';
 import del from 'del';
@@ -33,7 +33,7 @@ import {
 function checkJDK() {
   let regex = /\b((?:\d+\.){2}\d+(?:_\d+)?)\b/;
   return new Promise((resolve, reject) => {
-    let jdk = childProcess.spawn('java', ['-version']),
+    let jdk = spawn('java', ['-version']),
       version = null,
       fail = () => {
         console.error(chalk.red('[×] please install the JDK software'));
@@ -91,38 +91,50 @@ function execCatalinaScript(name){
     if(!name){
       reject('command name is required');
     }
-
-    if(name === 'run'){
-      console.error(chalk.red('[×] don\'t allow to use the \'run\' command, please use the \'start\' command'));
-      reject();
-    }
-
+    
     let suffix = '.sh',
-      script = [name];
+      opts = [name];
 
     if(_.isWin()){
       suffix = '.bat';
       // windows的startup.bat、shutdown.bat被改造了下
       // 将CATALINA_HOME环境变量指向tomcat所在的位置
-      script.push(TOMCAT_PATH);
+      opts.push(TOMCAT_PATH);
     } else {
       // linux/unix环境下针对stop命令增加-force参数
       if(name === 'stop'){
-        script.push('-force');
+        opts.push('-force');
       }
     }
 
-    let scriptPath = path.join(TOMCAT_PATH, 'bin', `catalina${suffix}`);
-    if(fs.existsSync(scriptPath)){
-      script.unshift(scriptPath);
-      script.unshift('CATALINA_PID=' + TOMCAT_PID);
+    let script = path.join(TOMCAT_PATH, 'bin', `catalina${suffix}`);
+    if(fs.existsSync(script)){
+      var stdout = '',
+        stderr = '',
+        command = spawn(script, opts, {
+          env: Object.assign(process.env, {
+            CATALINA_PID: TOMCAT_PID
+          })
+        });
 
-      childProcess.exec(script.join(' '), function(err, stdout){
-        if(err){
-          reject(err);
+      command.stdout.on('data', (data) => {
+        stdout += data;
+      });
+
+      command.stderr.on('data', (data) => {
+        stderr += data;
+      });
+
+      command.on('close', (code) => {
+        if(code === 0){
+          resolve(stdout);
         } else {
-          resolve(stdout.toString());
+          reject(stderr);
         }
+      });
+
+      command.on('error', function(err){
+        reject(err.message);
       });
     } else {
       reject(`${scriptPath} not found`);

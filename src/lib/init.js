@@ -11,7 +11,7 @@ import path from 'path';
 import inquirer from 'inquirer';
 import mkdirp from 'mkdirp';
 import cheerio from 'cheerio';
-import { pd } from 'pretty-data';
+import {pd} from 'pretty-data';
 import chalk from 'chalk';
 import del from 'del';
 
