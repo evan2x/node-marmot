@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.4.0-alpha.4
+
+* 修复velocity初始化失败的问题
+
 # 0.4.0-alpha.3
 
 * 更新版本号
