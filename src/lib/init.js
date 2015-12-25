@@ -244,7 +244,7 @@ export default (options) => {
     };
 
   if(options.force){
-    del.sync(WEB_XML_PATH, {force: true});
+    del.sync(path.dirname(WEB_XML_PATH), {force: true});
   }
 
   if(fs.existsSync(CONFIG_PATH)){

@@ -1,5 +1,14 @@
 # Marmot ChangeLog
 
+# 0.4.0-alpha.5
+
+* 修复windows关闭不了service的问题
+* `marmot init -f`由原本的仅删除`web.xml`文件改为删除整个`WEB-INF`目录
+* 对非正常路由的容错处理，如路由地址为`///user//info.html`将被修正为`/user/info.html`进行处理
+* 对路由文件结构进行严格检查，所有`<route uri="..." target="...">`配置必须包含在`<route-map>`标签中
+* 路由匹配改为仅匹配`URL`(原为匹配完整的路由，如包含了queryString的URL)
+* Marmot JAVA部分编译环境由`JDK8`降级为`JDK7`
+
 # 0.4.0-alpha.4
 
 * 修复velocity初始化失败的问题

@@ -48,7 +48,6 @@ function checkJDK() {
         console.log('JVM version: %s', version);
         if(process.env.JAVA_HOME || process.env.JRE_HOME){
           resolve();
-
         // JAVA_HOME与JRE_HOME全部都未设置时给予用户错误提示
         } else {
           console.error(chalk.red('[×] neither the JAVA_HOME nor the JRE_HOME environment variable is defined at least one of these environment variable is needed to run this program'));
@@ -93,53 +92,55 @@ function execCatalinaScript(name){
     }
     
     let suffix = '.sh',
-      opts = [name];
+      opts = [name],
+      env = {};
 
     if(_.isWin()){
       suffix = '.bat';
-      // windows的startup.bat、shutdown.bat被改造了下
-      // 将CATALINA_HOME环境变量指向tomcat所在的位置
-      opts.push(TOMCAT_PATH);
+      env['CATALINA_HOME'] = TOMCAT_PATH;
     } else {
-      // linux/unix环境下针对stop命令增加-force参数
-      if(name === 'stop'){
-        opts.push('-force');
+      // *nix启动时，记录pid
+      if(name === 'start'){
+        env['CATALINA_PID'] = TOMCAT_PID;
       }
     }
 
     let script = path.join(TOMCAT_PATH, 'bin', `catalina${suffix}`);
     if(fs.existsSync(script)){
-      var stdout = '',
-        stderr = '',
-        command = spawn(script, opts, {
-          env: Object.assign(process.env, {
-            CATALINA_PID: TOMCAT_PID
-          })
+      let command = spawn(script, opts, {
+          env: Object.assign(process.env, env)
         });
 
-      command.stdout.on('data', (data) => {
-        stdout += data;
-      });
+      // windows 启动时，总是返回成功
+      if(_.isWin() && name === 'start'){
+        resolve();
+      } else {
+        let stdout = '',
+          stderr = '';
 
-      command.stderr.on('data', (data) => {
-        stderr += data;
-      });
+        command.stdout.on('data', (data) => {
+          stdout += data;
+        });
 
-      command.on('close', (code) => {
-        if(code === 0){
-          resolve(stdout);
-        } else {
-          reject(stderr);
-        }
-      });
+        command.stderr.on('data', (data) => {
+          stderr += data;
+        });
+
+        command.on('close', (code) => {
+          if(code === 0){
+            resolve(stdout);
+          } else {
+            reject(stdout !== '' ? stdout : stderr);
+          }
+        });
+      }
 
       command.on('error', function(err){
         reject(err.message);
       });
     } else {
-      reject(`${scriptPath} not found`);
+      reject(`${script} not found`);
     }
-
   });
 }
 
@@ -164,9 +165,9 @@ function startTomcat(opts = {}){
       return (
         execCatalinaScript('start')
           .then((data) => {
-            // windows下1秒后退出当前进程...
+            // windows下2s后退出当前进程...
             if(_.isWin()){
-              setTimeout(() => process.exit(0), 1000);
+              setTimeout(() => process.exit(0), 2000);
             }
             return data;
           })
@@ -255,17 +256,28 @@ function startTomcat(opts = {}){
 }
 
 /**
- * 使用tomcat自带脚本停止server
+ * kill tomcat process
  * @return {Promise}
  */
 function stopTomcat(){
   return new Promise((resolve, reject) => {
+    let scriptKill = () => {
+      execCatalinaScript('stop').then(resolve).then(resolve);
+    }
+
     if(fs.existsSync(TOMCAT_PID)){
-      execCatalinaScript('stop')
-      .then(resolve)
-      .catch(reject);
+      let pid = fs.readFileSync(TOMCAT_PID).toString().trim();
+      if(pid){
+        try {
+          process.kill(pid, 'SIGKILL');
+          del.sync(TOMCAT_PID, {force: true});
+          resolve();
+        } catch(e){}
+      } else {
+        scriptKill();
+      }
     } else {
-      resolve();
+      scriptKill();
     }
   });
 }
@@ -372,7 +384,7 @@ export default function(options) {
           })
           .catch((err) => {
             console.error(chalk.red('[×] starting tomcat server has encountered a error'));
-            console.error(chalk.red(`[×] ${err}`));
+            err && console.error(chalk.red(`[×] ${err}`));
           });
 
         } else if(options.stop){
@@ -383,7 +395,7 @@ export default function(options) {
           })
           .catch((err) => {
             console.error(chalk.red('[×] stopping tomcat server has encountered a error'));
-            console.error(chalk.red(`[×] ${err}`));
+            err && console.error(chalk.red(`[×] ${err}`));
           });
 
         } else if(options.restart){
@@ -395,7 +407,7 @@ export default function(options) {
           })
           .catch((err) => {
             console.error(chalk.red('[×] restarting tomcat server has encountered a error'));
-            console.error(chalk.red(`[×] ${err}`));
+            err && console.error(chalk.red(`[×] ${err}`));
           });
         }
       });

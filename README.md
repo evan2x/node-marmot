@@ -20,6 +20,11 @@ sudo npm install -g marmot
 npm install -g marmot
 ```
 
+## 环境要求
+
+* Node.js 0.12+
+* JDK 7+
+
 ## Usage
 
 ### init 子命令
@@ -82,7 +87,6 @@ $ marmot server -S
 - 路由中的`uri`属性支持正则模式。
 - 关于正则模式配置请参考JAVA的正则表达式
 - 由于XML中禁止使用`&`和`<`符号，所以`uri`中请使用`&amp;`和`&lt;`实体符号代替
-- `uri`的匹配比较严格，通常是Ajax GET的时候我们不需要校验参数，那么可以在访问路径之后加上`.*`  
 
 	```xml
 	<!-- example -->
@@ -95,19 +99,19 @@ $ marmot server -S
 <!--main.xml的内容-->
 <?xml version="1.0" encoding="UTF-8"?>
 <router>
-  <router-map>
+  <route-map>
     <!-- 路由配置，uri：访问地址，target：目标文件 -->
     <route uri="/" target="/index.vm"/>
-  </router-map>
+  </route-map>
   <!-- 使用import 引入其他的router file -->
   <import src="product.xml"/>
 </router>
 
 <!-- product.xml的内容 -->
 <?xml version="1.0" encoding="UTF-8"?>
-<router-map>
+<route-map>
   <route url="product/index" target="/product/index.vm"/>
-</router-map>
+</route-map>
 ```
 
 **需要注意的是`<import src="xx"/>`中，引入其他路由文件的位置是相对于当前的`main.xml`文件的位置。我们建议您将所有路由统一放在同一个目录下**
