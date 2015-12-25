@@ -183,5 +183,5 @@ proj/
 
 ```xml
 <!-- 路由配置 -->
-<route uri="/users/detail\.json\?uid=\d+&amp;token=\w+" target="/mock/users/ajax/user.json"/>
+<route uri="/users/detail.json" target="/mock/users/ajax/user.json"/>
 ```
