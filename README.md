@@ -20,7 +20,7 @@ sudo npm install -g marmot
 npm install -g marmot
 ```
 
-## 环境要求
+## 依赖环境
 
 * Node.js 0.12+
 * JDK 7+
