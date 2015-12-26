@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @description marmot template file
+ * @description Marmot template file
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */
@@ -17,7 +17,7 @@ function freemarker(params) {
     TemplatePath: params.template,
     template_update_delay: 0,
     NoCache: true,
-    default_encoding: params.encoding
+    default_encoding: 'UTF-8'
   });
 }
 
@@ -29,8 +29,8 @@ function freemarker(params) {
 export function velocity(params) {
 
   return (
-`input.encoding = ${params.encoding}
-output.encoding = ${params.encoding}
+`input.encoding = UTF-8
+output.encoding = UTF-8
 resource.loader = webapp
 webapp.resource.loader.class = org.apache.velocity.tools.view.servlet.WebappLoader
 webapp.resource.loader.path = /${params.template}

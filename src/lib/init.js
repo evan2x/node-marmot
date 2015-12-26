@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @description marmot init command
+ * @description Marmot init command
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */
@@ -150,8 +150,7 @@ function initWebXML(answers) {
           name: 'freemarker',
           suffix: answers.fsuffix,
           tagSyntax: answers.tagSyntax,
-          template: answers.template,
-          encoding: answers.encoding
+          template: answers.template
         });
 
         $(FILTER_MAPPING_TAG).last().after(servlet);
