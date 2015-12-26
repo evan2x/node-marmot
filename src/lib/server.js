@@ -1,6 +1,6 @@
 /**
  * Copyright 2015 creditease Inc. All rights reserved.
- * @description marmot server command
+ * @description Marmot server command
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */
@@ -99,7 +99,7 @@ function execCatalinaScript(name){
       suffix = '.bat';
       env['CATALINA_HOME'] = TOMCAT_PATH;
     } else {
-      // *nix启动时，记录pid
+      // *nix环境下启动时，记录pid
       if(name === 'start'){
         env['CATALINA_PID'] = TOMCAT_PID;
       }
@@ -111,7 +111,7 @@ function execCatalinaScript(name){
           env: Object.assign(process.env, env)
         });
 
-      // windows 启动时，总是返回成功
+      // windows环境下启动时，总是返回成功
       if(_.isWin() && name === 'start'){
         resolve();
       } else {

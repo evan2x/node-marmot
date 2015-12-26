@@ -1,6 +1,6 @@
 /**
 * Copyright 2015 creditease Inc. All rights reserved.
-* @description marmot init questions
+* @description Marmot init questions
 * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
 * @date  2015/07/27
 */
@@ -36,16 +36,6 @@ export let common = [
     message: 'Enter the template directory:',
     'default': 'views',
     type: 'input'
-  },
-  {
-    name: 'encoding',
-    message: 'Select template encoding:',
-    'default': 'UTF-8',
-    type: 'list',
-    choices: [
-      'UTF-8',
-      'GBK'
-    ]
   },
   {
     name: 'router',

@@ -5,8 +5,6 @@
  * @date  2015/08/03
  */
 
-/* eslint-disable no-console */
-
 import path from 'path';
 import fs from 'fs';
 import url from 'url';
