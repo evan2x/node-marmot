@@ -1,5 +1,10 @@
 # Marmot ChangeLog
 
+# 0.4.0-alpha.7
+
+* 调整tomcat部分启动脚本
+* marmot java部分调整
+
 # 0.4.0-alpha.5
 
 * 修复windows关闭不了service的问题
