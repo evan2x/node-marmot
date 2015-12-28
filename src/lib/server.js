@@ -267,13 +267,11 @@ function stopTomcat(){
 
     if(fs.existsSync(TOMCAT_PID)){
       let pid = fs.readFileSync(TOMCAT_PID).toString().trim();
-      if(pid){
-        try {
-          process.kill(pid, 'SIGKILL');
-          del.sync(TOMCAT_PID, {force: true});
-          resolve();
-        } catch(e){}
-      } else {
+      try {
+        process.kill(pid, 'SIGKILL');
+        del.sync(TOMCAT_PID, {force: true});
+        resolve();
+      } catch(e){
         scriptKill();
       }
     } else {
