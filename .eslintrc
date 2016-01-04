@@ -43,6 +43,7 @@ rules:
   no-throw-literal: 2
   no-useless-concat: 2
   no-with: 2
+  radix: [2, "as-needed"]
   wrap-iife: [2, "any"]
 
   strict: [2, "global"]

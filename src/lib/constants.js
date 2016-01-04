@@ -14,12 +14,6 @@ import path from 'path';
 export const CWD = process.cwd();
 
 /**
- * 用户家目录
- * @type {String}
- */
-export const USERHOME = process.env.HOME || process.env.USERPROFILE;
-
-/**
  * marmot配置文件
  * @type {String}
  */
@@ -71,7 +65,7 @@ export const MARMOT_INIT_FILE = path.resolve(__dirname, '..', 'vendor/marmot.tar
  * tomcat
  * @type {String}
  */
-export const TOMCAT_PATH = path.join(USERHOME, '.__tomcat__');
+export const TOMCAT_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.__tomcat__');
 
 /**
  * tomcat配置文件
