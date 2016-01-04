@@ -35,7 +35,7 @@ export function download(src = '', target = CWD){
     let client = http.get(src, (res) => {
       let status = res.statusCode;
 
-      if(status === 200){
+      if (status === 200) {
         console.log(chalk.cyan('donwload the file from %s ...'), src);
 
         let outStream = fs.createWriteStream(target);
@@ -43,7 +43,7 @@ export function download(src = '', target = CWD){
           outStream.write(data);
           size += data.length;
           // 每下载500KB，提示一次
-          if(size - chunkedSize > 500 * 1024){
+          if (size - chunkedSize > 500 * 1024) {
             console.log(chalk.cyan('%s file downloaded %dKB.'), filename, Math.floor(size / 1024));
             chunkedSize = size;
           }
@@ -76,12 +76,12 @@ export function untargz(opts){
   return new Promise((resolve, reject) => {
     fs.createReadStream(opts.pack)
       .pipe(zlib.createGunzip())
-      .pipe(tar.Extract({
+      .pipe(tar.Extract({  // eslint-disable-line new-cap
         path: opts.target,
         strip: opts.strip || 0
       }))
       .on('error', (err) => {
-        if(err) console.error(chalk.red(`[×] ${err}`));
+        if (err) console.error(chalk.red(`[×] ${err}`));
         reject(err);
       })
       .on('end', () => {
@@ -95,7 +95,7 @@ export function untargz(opts){
  * @return {Object}
  */
 export function readRCFile(){
-  if(!fs.existsSync(CONFIG_PATH)){
+  if (!fs.existsSync(CONFIG_PATH)) {
     console.error(chalk.red('[×] .marmotrc file not found, please execute \'marmot init\' command'));
   }
   return JSON.parse(fs.readFileSync(CONFIG_PATH));
@@ -108,7 +108,7 @@ export function readRCFile(){
 export function readServerFile(){
   let config = '';
 
-  if(fs.existsSync(SERVER_CONFIG_PATH)){
+  if (fs.existsSync(SERVER_CONFIG_PATH)) {
     config = fs.readFileSync(SERVER_CONFIG_PATH, 'utf8');
   }
 
@@ -126,7 +126,7 @@ export function readServerFile(){
 export function writeServerFile(data){
   return new Promise((resolve, reject) => {
     fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), (err) => {
-      if(err){
+      if (err) {
         reject(err);
         return;
       }
@@ -136,7 +136,6 @@ export function writeServerFile(data){
   });
 }
 
-
 /**
  * 序列化为web.xml格式的参数配置
  * @param  {Object} params 参数表
@@ -144,8 +143,8 @@ export function writeServerFile(data){
  */
 export function serializeXMLParams(params) {
   let fragment = '';
-  for(let key in params){
-    if(params.hasOwnProperty(key)){
+  for (let key in params) {
+    if (params.hasOwnProperty(key)) {
       fragment += `<init-param>
                     <param-name>${key}</param-name>
                     <param-value>${params[key]}</param-value>
@@ -162,7 +161,7 @@ export function serializeXMLParams(params) {
 export function isWin(){
   let platform = os.platform();
 
-  if(platform === 'win32'){
+  if (platform === 'win32') {
     return true;
   }
 
@@ -206,15 +205,15 @@ export function printTables(tables = {
      * 分割线
      * @return {String}
      */
-    divide = () => {
-      return (
-        '|' +
-        '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1) +
-        '|\n'
-      );
-    };
+    divide = () => (
+      '|' +
+      '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1) +
+      '|\n'
+    );
 
-  list.forEach(item => (max) = item.map((v, i) => max[i] ? Math.max(max[i], v.length) : v.length));
+  list.forEach((item) => {
+    max = item.map((v, i) => Math.max(max[i] || 0, v.length));
+  });
 
   output += '\n';
   output += divide();
@@ -235,8 +234,8 @@ export function printTables(tables = {
  */
 export function checkParamsMutex(params){
   let count = 0;
-  for(let i = 0; i < params.length; i++){
-    if(params[i]){
+  for (let i = 0; i < params.length; i++) {
+    if (params[i]) {
       count++;
     }
   }

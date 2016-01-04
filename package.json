@@ -7,7 +7,7 @@
   },
   "scripts": {
     "prepublish": "babel -d ./ src/",
-    "lint": "eslint src/",
+    "lint": "./node_modules/.bin/eslint src/",
     "dev": "babel --watch -d ./ src/"
   },
   "repository": {
@@ -17,7 +17,8 @@
   "author": "evan2x",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^1.6.0"
+    "babel-eslint": "^4.1.6",
+    "eslint": "^1.10.0"
   },
   "dependencies": {
     "babel-core": "^5.8.22",

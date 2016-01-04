@@ -3,7 +3,6 @@
 import 'babel-core/register';
 import program from 'commander';
 import pkg from '../package.json';
-import * as _ from '../lib/helper';
 
 import init from '../lib/init';
 import server from '../lib/server';

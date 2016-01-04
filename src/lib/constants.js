@@ -53,7 +53,7 @@ export const TOMCAT_FILE = path.resolve(__dirname, '..', 'vendor/tomcat.tar.gz')
  * velocity gzip文件
  * @type {String}
  */
-export const VELOCITY_FILE = path.resolve(__dirname, '..','vendor/velocity.tar.gz');
+export const VELOCITY_FILE = path.resolve(__dirname, '..', 'vendor/velocity.tar.gz');
 
 /**
  * freemarker gzip文件

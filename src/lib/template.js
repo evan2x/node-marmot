@@ -13,11 +13,11 @@ import * as _ from './helper';
  */
 function freemarker(params) {
   return _.serializeXMLParams({
-    tag_syntax: params.tagSyntax,
+    tag_syntax: params.tagSyntax, // eslint-disable-line camelcase
     TemplatePath: params.template,
-    template_update_delay: 0,
+    template_update_delay: 0, // eslint-disable-line camelcase
     NoCache: true,
-    default_encoding: 'UTF-8'
+    default_encoding: 'UTF-8' // eslint-disable-line camelcase
   });
 }
 
@@ -88,27 +88,24 @@ export function service(conf) {
  */
 export function servlet(params) {
   let className = '',
-    fragment = '';
+    fragment = '',
+    props = {};
 
-  switch(params.name) {
+  switch (params.name) {
+    case 'velocity':
+      props['org.apache.velocity.properties'] = '/WEB-INF/velocity.properties';
 
-  case 'velocity':
-    let props = {
-      'org.apache.velocity.properties': '/WEB-INF/velocity.properties'
-    };
+      if (params.toolbox) {
+        props['org.apache.velocity.toolbox'] = params.toolbox;
+      }
+      
+      fragment = _.serializeXMLParams(props);
+      className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
+      break;
 
-    if(params.toolbox){
-      props['org.apache.velocity.toolbox'] = params.toolbox;
-    }
-    
-    fragment = _.serializeXMLParams(props);
-    className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
-    break;
-
-  case 'freemarker':
-    fragment = freemarker(params);
-    className = 'freemarker.ext.servlet.FreemarkerServlet';
-    
+    case 'freemarker':
+      fragment = freemarker(params);
+      className = 'freemarker.ext.servlet.FreemarkerServlet';
   }
 
   return (

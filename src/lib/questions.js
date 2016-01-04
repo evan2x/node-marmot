@@ -20,7 +20,7 @@ export let common = [
       'freemarker'
     ],
     validate(input) {
-      if( input.length > 0 ){
+      if (input.length > 0) {
         this.async()(true);
       }
     }
@@ -43,13 +43,12 @@ export let common = [
     'default': '/router/main.xml',
     type: 'input',
     validate(input) {
-      if(~input.lastIndexOf('.xml')){
+      if (~input.lastIndexOf('.xml')) {
         this.async()(true);
       }
     }
   }
 ];
-
 
 /**
 * velocity questions
@@ -68,7 +67,7 @@ export let velocity = [
     message: 'Enter a velocity toolbox.xml file(it must be a .xml file)',
     type: 'input',
     validate(input) {
-      if(input.trim() === '' || ~input.lastIndexOf('.xml')){
+      if (input.trim() === '' || ~input.lastIndexOf('.xml')) {
         this.async()(true);
       }
     }

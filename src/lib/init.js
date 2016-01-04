@@ -15,11 +15,9 @@ import {pd} from 'pretty-data';
 import chalk from 'chalk';
 import del from 'del';
 
-
 import * as _ from './helper';
 import * as questions from './questions';
 import * as template from './template';
-import pkg from '../package.json';
 
 import {
   CWD,
@@ -38,47 +36,43 @@ import {
 } from './constants';
 
 /**
- * 初始化项目
+ * 添加相关配置
+ * 1.marmot filter配置mock目录和router文件指定
+ * 1.过滤器中添加url-pattern
+ * @param  {Object} $
  * @param  {Object} answers
  */
-function initProject(answers) {
-  let exists = fs.existsSync;
+function configureAbout($, answers) {
+  let filters = $(FILTER_TAG),
+    filterMappingNames = $(FILTER_NAME_TAG, FILTER_MAPPING_TAG),
+    suffixs = [answers.vsuffix, answers.fsuffix];
 
-  // 配置文件存在的话，读取后合并当前answers
-  if(exists(CONFIG_PATH)){
-    answers = Object.assign(_.readRCFile(), answers);
-  }
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(answers, null, 2));
+  // filter中添加配置项
+  filters.each((index, item) => {
+    let $item = $(item);
 
-  // 创建mock数据目录
-  if(!exists(answers.mock)){
-    mkdirp.sync(answers.mock);
-  }
+    switch ($item.children(FILTER_NAME_TAG).text()) {
+      case REWRITE_FILTER:
+        $item.append(_.serializeXMLParams({
+          routerFile: answers.router
+        }));
+        break;
+      case MOCK_FILTER:
+        $item.append(_.serializeXMLParams({
+          mockDir: answers.mock
+        }));
+    }
+  });
 
-  // 创建template存放目录
-  if(!exists(answers.template)){
-    mkdirp.sync(answers.template);
-  }
-
-  const ROUTER_PATH = path.join(CWD, answers.router);
-  // 不存在则创建路由文件
-  if(!exists(ROUTER_PATH)){
-    mkdirp.sync(path.dirname(ROUTER_PATH));
-    fs.writeFileSync(ROUTER_PATH, pd.xml(template.router));
-  }
-
-  // 创建WEB-INF目录
-  if(!exists(WEB_XML_PATH)){
-    _.untargz({
-      pack: MARMOT_INIT_FILE,
-      target: CWD
-    })
-    .then(() => {
-      initWebXML(answers);
-    });
-  } else {
-    console.warn(chalk.yellow('[!] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
-  }
+    // filter-mapping中的MockFilter添加url-pattern
+  filterMappingNames.each((index, item) => {
+    let $item = $(item);
+    if ($item.text() === MOCK_FILTER) {
+      suffixs.forEach((suffix) => {
+        suffix && $item.after($('<url-pattern>').text(`*${suffix}`));
+      });
+    }
+  });
 }
 
 /**
@@ -102,22 +96,20 @@ function initWebXML(answers) {
      * @param  {String} file
      * @return {Promise}
      */
-    fetch = (file) => {
-      return _.untargz({
-        pack: file,
-        target: LIB_PATH,
-        strip: 1
-      });
-    };
+    fetch = (file) => _.untargz({
+      pack: file,
+      target: LIB_PATH,
+      strip: 1
+    });
 
   configureAbout($, answers);
 
   // 解压并配置velocity模板引擎
-  if(~engines.indexOf('velocity')){
+  if (~engines.indexOf('velocity')) {
     let toolboxFile = path.join(CWD, answers.toolbox);
 
     // 当用户输入了toobox.xml的文件路径后，但指定的toolbox.xml文件不存在时则给予用户提示
-    if(answers.toolbox && !fs.existsSync(toolboxFile)){
+    if (answers.toolbox && !fs.existsSync(toolboxFile)) {
       console.warn(chalk.yellow(`[!] ${answers.toolbox} file does not exist in the current directory, create ${answers.toolbox} file, execute 'marmot init -f' command again`));
     }
 
@@ -128,7 +120,7 @@ function initWebXML(answers) {
           suffix: answers.vsuffix
         };
 
-        if(answers.toolbox && fs.existsSync(toolboxFile)){
+        if (answers.toolbox && fs.existsSync(toolboxFile)) {
           data.toolbox = answers.toolbox;
         }
 
@@ -143,7 +135,7 @@ function initWebXML(answers) {
   }
 
   // 解压并配置freemarker模板引擎
-  if(~engines.indexOf('freemarker')){
+  if (~engines.indexOf('freemarker')) {
     fetch(FREEMARKER_FILE)
       .then(() => {
         servlet = template.servlet({
@@ -161,45 +153,47 @@ function initWebXML(answers) {
 }
 
 /**
- * 添加相关配置
- * 1.marmot filter配置mock目录和router文件指定
- * 1.过滤器中添加url-pattern
- * @param  {Object} $
+ * 初始化项目
  * @param  {Object} answers
  */
-function configureAbout($, answers) {
-  let filters = $(FILTER_TAG),
-    filterMappingNames = $(FILTER_NAME_TAG, FILTER_MAPPING_TAG),
-    suffixs = [answers.vsuffix, answers.fsuffix];
+function initProject(answers) {
+  let exists = fs.existsSync;
 
-  // filter中添加配置项
-  filters.each((index, item) => {
-    let $item = $(item);
+  // 配置文件存在的话，读取后合并当前answers
+  if (exists(CONFIG_PATH)) {
+    answers = Object.assign(_.readRCFile(), answers);
+  }
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(answers, null, 2));
 
-    switch ($item.children(FILTER_NAME_TAG).text()) {
+  // 创建mock数据目录
+  if (!exists(answers.mock)) {
+    mkdirp.sync(answers.mock);
+  }
 
-    case REWRITE_FILTER:
-      $item.append(_.serializeXMLParams({
-        routerFile: answers.router
-      }));
-      break;
-    case MOCK_FILTER:
-      $item.append(_.serializeXMLParams({
-        mockDir: answers.mock
-      }));
+  // 创建template存放目录
+  if (!exists(answers.template)) {
+    mkdirp.sync(answers.template);
+  }
 
-    }
-  });
+  const ROUTER_PATH = path.join(CWD, answers.router);
+  // 不存在则创建路由文件
+  if (!exists(ROUTER_PATH)) {
+    mkdirp.sync(path.dirname(ROUTER_PATH));
+    fs.writeFileSync(ROUTER_PATH, pd.xml(template.router));
+  }
 
-    // filter-mapping中的MockFilter添加url-pattern
-  filterMappingNames.each((index, item) => {
-    let $item = $(item);
-    if($item.text() === MOCK_FILTER){
-      suffixs.forEach((suffix) => {
-        suffix && $item.after($('<url-pattern>').text(`*${suffix}`));
-      });
-    }
-  });
+  // 创建WEB-INF目录
+  if (!exists(WEB_XML_PATH)) {
+    _.untargz({
+      pack: MARMOT_INIT_FILE,
+      target: CWD
+    })
+    .then(() => {
+      initWebXML(answers);
+    });
+  } else {
+    console.warn(chalk.yellow('[!] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
+  }
 }
 
 export default (options) => {
@@ -210,13 +204,11 @@ export default (options) => {
      * @param  {String} key
      * @return {Array}
      */
-    remove = (arr, key) => {
-      return arr.filter((item) => {
-        if(item.name !== key){
-          return item;
-        }
-      });
-    },
+    remove = (arr, key) => arr.filter((item) => {
+      if (item.name !== key) {
+        return item;
+      }
+    }),
     /**
      * 子问题
      * @param  {Array}   engines
@@ -226,33 +218,33 @@ export default (options) => {
       let subq = [];
 
       // velocity questions
-      if( ~engines.indexOf('velocity') ){
+      if (~engines.indexOf('velocity')) {
         subq = [...subq, ...questions.velocity];
       }
 
       // freemarker questions
-      if( ~engines.indexOf('freemarker') ){
+      if (~engines.indexOf('freemarker')) {
         subq = [...subq, ...questions.freemarker];
       }
 
-      if( subq.length > 0 ){
+      if (subq.length > 0) {
         inquirer.prompt(subq, done);
       } else {
         done({});
       }
     };
 
-  if(options.force){
+  if (options.force) {
     del.sync(path.dirname(WEB_XML_PATH), {force: true});
   }
 
-  if(fs.existsSync(CONFIG_PATH)){
+  if (fs.existsSync(CONFIG_PATH)) {
     config = _.readRCFile();
   }
 
   // 过滤已经回答过的问题
-  for(let key in config){
-    if(config.hasOwnProperty(key)){
+  for (let key in config) {
+    if (config.hasOwnProperty(key)) {
       questions.common = remove(questions.common, key);
       questions.velocity = remove(questions.velocity, key);
       questions.freemarker = remove(questions.freemarker, key);
@@ -260,7 +252,7 @@ export default (options) => {
   }
 
   // common questions
-  if(questions.common.length > 0){
+  if (questions.common.length > 0) {
     inquirer.prompt(questions.common, (answers) => {
       subPrompt(answers.engines || config.engines, (subAnswers) => {
         initProject(Object.assign(answers, subAnswers));
@@ -268,7 +260,7 @@ export default (options) => {
     });
 
   // freemarker and velocity questions
-  } else if(questions.freemarker.length > 0 || questions.velocity.length > 0){
+  } else if (questions.freemarker.length > 0 || questions.velocity.length > 0) {
     subPrompt(config.engines, initProject);
 
   // use package.json config
