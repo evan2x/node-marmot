@@ -110,7 +110,7 @@ function initWebXML(answers) {
 
     // 当用户输入了toobox.xml的文件路径后，但指定的toolbox.xml文件不存在时则给予用户提示
     if (answers.toolbox && !fs.existsSync(toolboxFile)) {
-      console.warn(chalk.yellow(`[!] ${answers.toolbox} file does not exist in the current directory, create ${answers.toolbox} file, execute 'marmot init -f' command again`));
+      console.warn(chalk.yellow(`[i] ${answers.toolbox} file does not exist in the current directory, create ${answers.toolbox} file, execute 'marmot init -f' command again`));
     }
 
     fetch(VELOCITY_FILE)
@@ -192,7 +192,7 @@ function initProject(answers) {
       initWebXML(answers);
     });
   } else {
-    console.warn(chalk.yellow('[!] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
+    console.warn(chalk.yellow('[i] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
   }
 }
 

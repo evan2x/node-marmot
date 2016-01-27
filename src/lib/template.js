@@ -49,10 +49,8 @@ export let router = (
   `<?xml version="1.0" encoding="UTF-8"?>
   <router>
     <route-map>
-      <!-- 路由配置，uri：访问地址，target：目标文件 -->
-      <!-- <route uri="/" target="/index.vm"/> -->
+      <!-- <route rule="/" location="/index.vm"/> -->
     </route-map>
-    <!-- 使用import 引入其他的router file -->
     <!-- <import src="product.xml"/> -->
   </router>`
 );

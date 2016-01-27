@@ -1,5 +1,12 @@
 # Marmot ChangeLog
 
+# 0.5.0-beta.1
+
+* 重写JAVA部分实现，优化JAVA部分的代码。
+* 增加远程模拟数据，即请求转发功能。
+* 路由规则原`uri`属性改为`rule`，`target`属性改为`location`，`uri`与`target`仍被保留，为了向下兼容
+* 更详细的说明文档
+
 # 0.4.0-alpha.7
 
 * 调整tomcat部分启动脚本
