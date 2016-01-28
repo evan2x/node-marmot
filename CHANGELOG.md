@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.5.0-beta.2
+
+* 修复路由偶尔无法解析的问题
+
 # 0.5.0-beta.1
 
 * 重写JAVA部分实现，优化JAVA部分的代码。
