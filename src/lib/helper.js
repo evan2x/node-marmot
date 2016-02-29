@@ -22,14 +22,13 @@ import {
   SERVER_CONFIG_PATH
 } from './constants';
 
-export function download(src = '', target = CWD){
+export function download(src = '', target = CWD) {
   let size = 0,
     chunkedSize = 0,
     options = url.parse(src),
     filename = path.basename(options.path),
+    targetPath = path.join(target, filename),
     http = options.protocol === 'https:' ? require('https') : require('http');
-
-  target = path.join(target, filename);
 
   return new Promise((resolve, reject) => {
     let client = http.get(src, (res) => {
@@ -38,7 +37,7 @@ export function download(src = '', target = CWD){
       if (status === 200) {
         console.log(chalk.cyan('donwload the file from %s ...'), src);
 
-        let outStream = fs.createWriteStream(target);
+        let outStream = fs.createWriteStream(targetPath);
         res.on('data', (data) => {
           outStream.write(data);
           size += data.length;
@@ -61,7 +60,7 @@ export function download(src = '', target = CWD){
             filename,
             Math.floor(size / 1024)
           );
-          resolve(target);
+          resolve(targetPath);
         });
 
         res.on('error', (err) => reject(err));
@@ -81,7 +80,7 @@ export function download(src = '', target = CWD){
  * @param {String} opts.target 解压到指定目录
  * @param {Number} opts.strip
  */
-export function untargz(opts){
+export function untargz(opts) {
   return new Promise((resolve, reject) => {
     fs.createReadStream(opts.pack)
       .pipe(zlib.createGunzip())
@@ -103,7 +102,7 @@ export function untargz(opts){
  * 读取marmot的配置文件
  * @return {Object}
  */
-export function readRCFile(){
+export function readRCFile() {
   if (!fs.existsSync(CONFIG_PATH)) {
     console.error(chalk.red('[×] .marmotrc file not found, please execute \'marmot init\' command'));
   }
@@ -114,7 +113,7 @@ export function readRCFile(){
  * 读取tomcat的server.xml文件
  * @return {Object}
  */
-export function readServerFile(){
+export function readServerFile() {
   let config = '';
 
   if (fs.existsSync(SERVER_CONFIG_PATH)) {
@@ -132,7 +131,7 @@ export function readServerFile(){
  * @param  {String<XML>} data
  * @return {Promise}
  */
-export function writeServerFile(data){
+export function writeServerFile(data) {
   return new Promise((resolve, reject) => {
     fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), (err) => {
       if (err) {
@@ -167,7 +166,7 @@ export function serializeXMLParams(params) {
  * 检测是否为windows平台
  * @return {Boolean}
  */
-export function isWin(){
+export function isWin() {
   let platform = os.platform();
 
   if (platform === 'win32') {
@@ -191,7 +190,7 @@ export function isWin(){
 export function printTables(tables = {
   head: [],
   body: []
-}){
+}) {
   let space = ' ',
     output = '',
     placeholder = '',
@@ -208,17 +207,17 @@ export function printTables(tables = {
         placeholder = space.repeat(max[i] - v.length);
         str += `  ${v}${placeholder}  |`;
       });
-      return str + '\n';
+      return `${str}\n`;
     },
     /**
      * 分割线
      * @return {String}
      */
-    divide = () => (
-      '|' +
-      '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1) +
-      '|\n'
-    );
+    divide = () => {
+      let line = '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1);
+
+      return `|${line}|\n`;
+    };
 
   list.forEach((item) => {
     max = item.map((v, i) => Math.max(max[i] || 0, v.length));
@@ -241,7 +240,7 @@ export function printTables(tables = {
  * @param  {Array} params 参数列表
  * @return {Boolean}
  */
-export function checkParamsMutex(params){
+export function checkParamsMutex(params) {
   let count = 0;
   for (let i = 0; i < params.length; i++) {
     if (params[i]) {

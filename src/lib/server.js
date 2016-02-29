@@ -81,7 +81,7 @@ function checkTomcat() {
  * @param  {String} name 命令名称
  * @return {Child_Process}
  */
-function execCatalinaScript(name){
+function execCatalinaScript(name) {
   return new Promise((resolve, reject) => {
     if (!name) {
       reject('command name is required');
@@ -93,12 +93,9 @@ function execCatalinaScript(name){
 
     if (_.isWin()) {
       suffix = '.bat';
-      env['CATALINA_HOME'] = TOMCAT_PATH;
-    } else {
-      // *nix环境下启动时，记录pid
-      if (name === 'start') {
-        env['CATALINA_PID'] = TOMCAT_PID;
-      }
+      env.CATALINA_HOME = TOMCAT_PATH;
+    } else if (name === 'start') {
+      env.CATALINA_PID = TOMCAT_PID;
     }
 
     let script = path.join(TOMCAT_PATH, 'bin', `catalina${suffix}`);
@@ -126,7 +123,7 @@ function execCatalinaScript(name){
           if (code === 0) {
             resolve(stdout);
           } else {
-            reject(stdout !== '' ? stdout : stderr);
+            reject(stdout === '' ? stderr : stdout);
           }
         });
       }
@@ -144,11 +141,11 @@ function execCatalinaScript(name){
  * kill tomcat process
  * @return {Promise}
  */
-function stopTomcat(){
+function stopTomcat() {
   return new Promise((resolve, reject) => {
     let scriptStop = () => {
       execCatalinaScript('stop').then(resolve).catch(reject);
-    }
+    };
 
     if (fs.existsSync(TOMCAT_PID)) {
       let pid = fs.readFileSync(TOMCAT_PID).toString().trim();
@@ -171,7 +168,7 @@ function stopTomcat(){
  * @param {Boolean} opts.port 端口号
  * @return {Promise}
  */
-function startTomcat(opts = {}){
+function startTomcat(opts = {}) {
   let options = path.parse(CWD),
     $ = _.readServerFile(),
     // 匹配服务是否存在
@@ -271,7 +268,7 @@ function startTomcat(opts = {}){
 /**
  * 显示tomcat配置中已经存在的service
  */
-function showServices(){
+function showServices() {
   let $ = _.readServerFile(),
     list = [];
 
@@ -294,7 +291,7 @@ function showServices(){
  * 根据端口号删除对应的service
  * @param  {String} port
  */
-function deleteServiceByPort(port){
+function deleteServiceByPort(port) {
   if (typeof port === 'boolean') {
     return;
   }

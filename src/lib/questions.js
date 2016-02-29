@@ -43,7 +43,7 @@ export let common = [
     'default': '/router/main.xml',
     type: 'input',
     validate(input) {
-      if (~input.lastIndexOf('.xml')) {
+      if (input.endsWith('.xml')) {
         this.async()(true);
       }
     }
@@ -67,7 +67,7 @@ export let velocity = [
     message: 'Enter a velocity toolbox.xml file(it must be a .xml file)',
     type: 'input',
     validate(input) {
-      if (input.trim() === '' || ~input.lastIndexOf('.xml')) {
+      if (input.trim() === '' || input.endsWith('.xml')) {
         this.async()(true);
       }
     }

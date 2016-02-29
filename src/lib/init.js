@@ -69,7 +69,9 @@ function configureAbout($, answers) {
     let $item = $(item);
     if ($item.text() === MOCK_FILTER) {
       suffixs.forEach((suffix) => {
-        suffix && $item.after($('<url-pattern>').text(`*${suffix}`));
+        if (suffix) {
+          $item.after($('<url-pattern>').text(`*${suffix}`));
+        }
       });
     }
   });
@@ -105,7 +107,7 @@ function initWebXML(answers) {
   configureAbout($, answers);
 
   // 解压并配置velocity模板引擎
-  if (~engines.indexOf('velocity')) {
+  if (engines.includes('velocity')) {
     let toolboxFile = path.join(CWD, answers.toolbox);
 
     // 当用户输入了toobox.xml的文件路径后，但指定的toolbox.xml文件不存在时则给予用户提示
@@ -135,7 +137,7 @@ function initWebXML(answers) {
   }
 
   // 解压并配置freemarker模板引擎
-  if (~engines.indexOf('freemarker')) {
+  if (engines.includes('freemarker')) {
     fetch(FREEMARKER_FILE)
       .then(() => {
         servlet = template.servlet({
@@ -156,12 +158,13 @@ function initWebXML(answers) {
  * 初始化项目
  * @param  {Object} answers
  */
-function initProject(answers) {
-  let exists = fs.existsSync;
+function initProject(data) {
+  let exists = fs.existsSync,
+    answers = data;
 
   // 配置文件存在的话，读取后合并当前answers
   if (exists(CONFIG_PATH)) {
-    answers = Object.assign(_.readRCFile(), answers);
+    answers = Object.assign(_.readRCFile(), data);
   }
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(answers, null, 2));
 
@@ -183,7 +186,9 @@ function initProject(answers) {
   }
 
   // 创建WEB-INF目录
-  if (!exists(WEB_XML_PATH)) {
+  if (exists(WEB_XML_PATH)) {
+    console.warn(chalk.yellow('[i] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
+  } else {
     _.untargz({
       pack: MARMOT_INIT_FILE,
       target: CWD
@@ -191,8 +196,6 @@ function initProject(answers) {
     .then(() => {
       initWebXML(answers);
     });
-  } else {
-    console.warn(chalk.yellow('[i] WEB-INF directory already exists in the current directory, if you want to force initialization, do \'marmot init -f\''));
   }
 }
 
@@ -204,7 +207,7 @@ export default (options) => {
      * @param  {String} key
      * @return {Array}
      */
-    remove = arr => arr.filter(item => item.name !== key),
+    remove = (arr, key) => arr.filter((item) => item.name !== key),
     /**
      * 子问题
      * @param  {Array}   engines
@@ -214,12 +217,12 @@ export default (options) => {
       let subq = [];
 
       // velocity questions
-      if (~engines.indexOf('velocity')) {
+      if (engines.includes('velocity')) {
         subq = [...subq, ...questions.velocity];
       }
 
       // freemarker questions
-      if (~engines.indexOf('freemarker')) {
+      if (engines.includes('freemarker')) {
         subq = [...subq, ...questions.freemarker];
       }
 

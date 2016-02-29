@@ -96,7 +96,7 @@ export function servlet(params) {
       if (params.toolbox) {
         props['org.apache.velocity.toolbox'] = params.toolbox;
       }
-      
+
       fragment = _.serializeXMLParams(props);
       className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
       break;
