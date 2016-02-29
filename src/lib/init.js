@@ -204,11 +204,7 @@ export default (options) => {
      * @param  {String} key
      * @return {Array}
      */
-    remove = (arr, key) => arr.filter((item) => {
-      if (item.name !== key) {
-        return item;
-      }
-    }),
+    remove = arr => arr.filter(item => item.name !== key),
     /**
      * 子问题
      * @param  {Array}   engines

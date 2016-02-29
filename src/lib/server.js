@@ -86,7 +86,7 @@ function execCatalinaScript(name){
     if (!name) {
       reject('command name is required');
     }
-    
+
     let suffix = '.sh',
       opts = [name],
       env = {};

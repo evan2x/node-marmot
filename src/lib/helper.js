@@ -44,14 +44,23 @@ export function download(src = '', target = CWD){
           size += data.length;
           // 每下载500KB，提示一次
           if (size - chunkedSize > 500 * 1024) {
-            console.log(chalk.cyan('%s file downloaded %dKB.'), filename, Math.floor(size / 1024));
+            console.log(
+              chalk.cyan('%s file downloaded %dKB.'),
+              filename,
+              Math.floor(size / 1024)
+            );
+
             chunkedSize = size;
           }
         });
 
         res.on('end', () => {
           outStream.end();
-          console.log(chalk.green('[√] %s file download is complete, the file total size is %dKB.'), filename, Math.floor(size / 1024));
+          console.log(
+            chalk.green('[√] %s file download is complete, the file total size is %dKB.'),
+            filename,
+            Math.floor(size / 1024)
+          );
           resolve(target);
         });
 

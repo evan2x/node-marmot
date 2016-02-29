@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import 'babel-core/register';
 import program from 'commander';
 import pkg from '../package.json';
 
