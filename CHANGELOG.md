@@ -1,5 +1,10 @@
 # Marmot ChangeLog
 
+# 0.5.0-beta.4
+
+* 更新至 ESLint 2.x
+* 优化代码
+
 # 0.5.0-beta.2
 
 * 修复路由偶尔无法解析的问题
