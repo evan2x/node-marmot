@@ -1,6 +1,6 @@
 # Marmot
 
-[![](https://img.shields.io/badge/node.js->=_0.12-brightgreen.svg?style=flat-square)]()
+[![](https://img.shields.io/badge/node.js-%3E=_4.0-brightgreen.svg?style=flat-square)]()
 
 一个解析velocity或者freemarker模板的平台。
 
