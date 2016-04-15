@@ -94,7 +94,7 @@ $ marmot server -S
     <route rule="/api/v1/user.json" provider="http://127.0.0.1:3000" />
     <route rule="/user/center" render-template="/user/center.vm" provider="http://xxx.xxx.xxx" />
   </route-map>
-
+  
   <route-map provider="">
     <route rule="">
   </route-map>
@@ -172,7 +172,7 @@ xxx.xxx.xxx
 结果：
 
 ```
-当前本地服务为
+当前本地服务为 
 http://127.0.0.1:8080
 
 发起请求，命中route规则
@@ -413,7 +413,7 @@ JSP：
   Person p = new Person();
   p.setName("evan2x");
   p.setAge(24);
-
+  
   out.print(JSON.toJSONString(p));
 %>
 ```
