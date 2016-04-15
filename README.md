@@ -22,7 +22,7 @@ npm install -g marmot
 
 ## 依赖环境
 
-* Node.js 0.12+
+* Node.js 4.0+
 * JDK 7+
 
 ## Usage
