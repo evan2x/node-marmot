@@ -1,5 +1,23 @@
 # Marmot ChangeLog
 
+# 0.6.0-alpha.1
+
+* Servlet容器由Tomcat改为Jetty，默认支持JSP, JSTL, EL。
+* marmot server命令重构，将原有以参数形式的启动方式改为命令的方式。
+* 由于使用的是嵌入式的Jetty，所以`--clean`参数已经移除。
+* `marmot server --start` 改为 `marmot server start`
+* `marmot server --stop` 改为 `marmot server stop`
+* `marmot server --list` 改为 `marmot server list`
+* `marmot server --delete` 改为 `marmot server remove`
+* 移除 `--restart` 参数
+* 增加`-n, --name` 参数用于指定服务名
+* 增加`-i, --id` 参数用于指定服务ID
+* 路由文件中由原`<route-map>`标签改为`<routes>`，但同时兼容，建议使用`<routes>`
+* 路由增加代理功能，`<router>`, `<routes>`, `<route>` 标签均具有 `provider` 属性，该属性会继承，即 `route` 继承 `routes` 继承 `router`。
+* 路由增加支持 `cookie` 设置。
+* 增加由marmot代理发出的请求，HTTP Headers中会包含 `X-Requested-With: MarmotHttpRequest`。
+* 当没有输入任何子命令时，打印帮助信息。
+
 # 0.5.0
 
 * release 0.5.0
