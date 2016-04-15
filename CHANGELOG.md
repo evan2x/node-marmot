@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.5.0
+
+* release 0.5.0
+
 # 0.5.0-beta.4
 
 * 更新至 ESLint 2.x
