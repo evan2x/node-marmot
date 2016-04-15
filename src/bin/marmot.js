@@ -5,31 +5,98 @@ import program from 'commander';
 import pkg from '../package.json';
 
 import init from '../lib/init';
-import server from '../lib/server';
+import * as server from '../lib/server';
 
 program
   .usage('<command>')
   .version(pkg.version)
-  .description(pkg.description);
+  .description(pkg.description)
+  .on('--help', () => {
+    console.log('  Examples:');
+    console.log('');
+    console.log('    Initialize the project:');
+    console.log('    $ marmot init');
+    console.log('');
+    console.log('    Forced to initialize the project:');
+    console.log('    $ marmot init -f');
+    console.log('');
+    console.log('    start the server on the port 8090:');
+    console.log('    $ marmot server start -p 8090');
+    console.log('');
+    console.log('    stop the server:');
+    console.log('    $ marmot server stop');
+    console.log('');
+    console.log('    list all services:');
+    console.log('    $ marmot server list');
+  });
 
-// init sub command
 program
   .command('init')
+  .usage('<command> [options]')
   .description('init project')
-  .option('-f, --force', 'forced to redownload WEB-INF directory of the current project')
+  .option('-f, --force', 'forced to initialize WEB-INF directory of the current project')
   .action(init);
 
-// server sub command
-program
+const commander = program
   .command('server')
-  .description('a tomcat server')
-  .option('-p, --port [port]', 'specify the server listening [port] to start', 8080)
-  .option('-s, --start', 'start the tomcat server')
-  .option('-S, --stop', 'stop the tomcat server')
-  .option('-r, --restart', 'restart the tomcat server')
-  .option('-c, --clean', 'cleanup the tomcat server')
-  .option('-l, --list', 'list of tomcat services')
-  .option('-d, --delete [port]', 'delete the service by [port]')
-  .action(server);
+  .usage('<command> [options]')
+  .option('-p, --port [port]', 'specify the port used to start,stop,delete the service (default: 8080)', parseInt)
+  .option('-i, --id [id]', 'specify the service id used to restart,stop,delete the service', parseInt)
+  .option('-n, --name [name]', 'specify the port used to start,restart,stop,delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'\[\]$\+&%#!~`]+$/)
+  .description('a embedded jetty server')
+  .action((...args) => {
+    let cmd = args[args.length - 1];
+
+    if (typeof cmd.name === 'function') {
+      cmd.name = null;
+    }
+
+    switch(args[0]) {
+      case 'start':
+        server.start(cmd.port, cmd.name);
+        break;
+
+      case 'stop':
+        server.stop(cmd.port, cmd.name, cmd.id);
+        break;
+
+      case 'list':
+      case 'ls':
+        server.list();
+        break;
+
+      case 'remove':
+      case 'rm':
+        server.remove(cmd.port, cmd.name, cmd.id);
+        break;
+
+      default:
+        cmd.outputHelp();
+    }
+  });
+
+// 注册server下的commander
+commander
+  .command('start')
+  .description('start a jetty service');
+
+commander
+  .command('stop')
+  .description('stop a jetty service');
+
+commander
+  .command('remove')
+  .alias('rm')
+  .description('remove and stop the service from the services list');
+
+commander
+  .command('list')
+  .alias('ls')
+  .description('list of all services');
 
 program.parse(process.argv);
+
+if (process.argv.length == 2) {
+  program.outputHelp();
+  process.exit(1);
+}

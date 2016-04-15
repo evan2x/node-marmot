@@ -15,63 +15,14 @@ import chalk from 'chalk';
 import tar from 'tar';
 import {pd} from 'pretty-data';
 import cheerio from 'cheerio';
+import * as tmpl from './template';
 
 import {
   CWD,
   CONFIG_PATH,
+  MARMOT_SERVICES_PATH,
   SERVER_CONFIG_PATH
 } from './constants';
-
-export function download(src = '', target = CWD) {
-  let size = 0,
-    chunkedSize = 0,
-    options = url.parse(src),
-    filename = path.basename(options.path),
-    targetPath = path.join(target, filename),
-    http = options.protocol === 'https:' ? require('https') : require('http');
-
-  return new Promise((resolve, reject) => {
-    let client = http.get(src, (res) => {
-      let status = res.statusCode;
-
-      if (status === 200) {
-        console.log(chalk.cyan('donwload the file from %s ...'), src);
-
-        let outStream = fs.createWriteStream(targetPath);
-        res.on('data', (data) => {
-          outStream.write(data);
-          size += data.length;
-          // 每下载500KB，提示一次
-          if (size - chunkedSize > 500 * 1024) {
-            console.log(
-              chalk.cyan('%s file downloaded %dKB.'),
-              filename,
-              Math.floor(size / 1024)
-            );
-
-            chunkedSize = size;
-          }
-        });
-
-        res.on('end', () => {
-          outStream.end();
-          console.log(
-            chalk.green('[√] %s file download is complete, the file total size is %dKB.'),
-            filename,
-            Math.floor(size / 1024)
-          );
-          resolve(targetPath);
-        });
-
-        res.on('error', (err) => reject(err));
-      } else {
-        client.abort();
-        console.error(chalk.red('[×] downloading error, status code: %d'), status);
-        reject(status, res.statusMessage);
-      }
-    });
-  });
-}
 
 /**
  * 解压tar.gz文件
@@ -89,7 +40,7 @@ export function untargz(opts) {
         strip: opts.strip || 0
       }))
       .on('error', (err) => {
-        if (err) console.error(chalk.red(`[×] ${err}`));
+        if (err) console.error(chalk.red('[×] %s'), err.message);
         reject(err);
       })
       .on('end', () => {
@@ -110,73 +61,6 @@ export function readRCFile() {
 }
 
 /**
- * 读取tomcat的server.xml文件
- * @return {Object}
- */
-export function readServerFile() {
-  let config = '';
-
-  if (fs.existsSync(SERVER_CONFIG_PATH)) {
-    config = fs.readFileSync(SERVER_CONFIG_PATH, 'utf8');
-  }
-
-  return cheerio.load(config, {
-    normalizeWhitespace: true,
-    xmlMode: true
-  });
-}
-
-/**
- * 对tomcat的server.xml文件写入数据
- * @param  {String<XML>} data
- * @return {Promise}
- */
-export function writeServerFile(data) {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(SERVER_CONFIG_PATH, pd.xml(data), (err) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      resolve();
-    });
-  });
-}
-
-/**
- * 序列化为web.xml格式的参数配置
- * @param  {Object} params 参数表
- * @return {String}
- */
-export function serializeXMLParams(params) {
-  let fragment = '';
-  for (let key in params) {
-    if (params.hasOwnProperty(key)) {
-      fragment += `<init-param>
-                    <param-name>${key}</param-name>
-                    <param-value>${params[key]}</param-value>
-                  </init-param>`;
-    }
-  }
-  return fragment;
-}
-
-/**
- * 检测是否为windows平台
- * @return {Boolean}
- */
-export function isWin() {
-  let platform = os.platform();
-
-  if (platform === 'win32') {
-    return true;
-  }
-
-  return false;
-}
-
-/**
  * 控制台中打印一张表
  * @param  {Object} tables
  * @example
@@ -194,59 +78,267 @@ export function printTables(tables = {
   let space = ' ',
     output = '',
     placeholder = '',
-    max = [],
     list = [tables.head, ...tables.body],
-    /**
-     * 将传入的数组转化为一行数据
-     * @param {Array}
-     * @return {String}
-     */
-    convert = (arr) => {
-      let str = '|';
-      arr.forEach((v, i) => {
-        placeholder = space.repeat(max[i] - v.length);
-        str += `  ${v}${placeholder}  |`;
-      });
-      return `${str}\n`;
+    rowWidth = [],
+    margin = space.repeat(2),
+    symbols = {
+      header: {
+        l: '┌',
+        c: '┬',
+        r: '┐'
+      },
+      body: {
+        l: '├',
+        c: '┼',
+        r: '┤'
+      },
+      footer: {
+        l: '└',
+        c: '┴',
+        r: '┘'
+      }
     },
     /**
      * 分割线
+     * @param  {Array}  width    单元格宽度
+     * @param  {Object} symbols  单元格分隔符
      * @return {String}
      */
-    divide = () => {
-      let line = '-'.repeat(max.reduce((p, v) => p + v) + max.length * 5 - 1);
+    breakline = (width, symbols) => {
+      let line = symbols.l;
 
-      return `|${line}|\n`;
+      for (let i = 0; i < width.length; i++) {
+        line += '─'.repeat(width[i] + margin.length * 2);
+        if (i < width.length - 1) {
+          line += symbols.c;
+        }
+      }
+
+      line += symbols.r;
+
+      return `${line}\n`;
+    },
+    /**
+     * 创建一行数据
+     * @param  {Number} type
+     * @param  {Array}  data  要打印的数据
+     * @param  {Array}  width 单元格宽度
+     * @return {String}
+     */
+    createRow = (data, width) => {
+      let str = '│';
+
+      for (let i = 0; i < data.length; i++) {
+        let cell = '' + data[i],
+          len = cell.replace(/\u001b\[\d+m/gi, '').length;
+
+        placeholder = space.repeat(Math.max(width[i] - len, 0));
+        str += `${margin}${cell}${placeholder}${margin}│`;
+      }
+
+      return `${str}\n`;
     };
 
   list.forEach((item) => {
-    max = item.map((v, i) => Math.max(max[i] || 0, v.length));
+    rowWidth = item.map((v, i) => {
+      let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length;
+      return Math.max(rowWidth[i] || 0, len);
+    });
   });
 
-  output += '\n';
-  output += divide();
-  output += convert(tables.head);
-  output += divide();
-  tables.body.forEach((item) => {
-    output += convert(item);
-  });
-  output += divide();
+  output += breakline(rowWidth, symbols.header);
+  // 首行
+  output += createRow(tables.head, rowWidth);
+
+  for (let i = 0; i < tables.body.length; i++) {
+    output += breakline(rowWidth, symbols.body);
+    output += createRow(tables.body[i], rowWidth);
+  }
+
+  output += breakline(rowWidth, symbols.footer);
 
   process.stdout.write(output);
 }
 
 /**
- * 检查参数的互斥性
- * @param  {Array} params 参数列表
- * @return {Boolean}
+ * 创建web.xml格式的参数配置
+ * @param  {Object} params 参数表
+ * @return {String}
  */
-export function checkParamsMutex(params) {
-  let count = 0;
-  for (let i = 0; i < params.length; i++) {
-    if (params[i]) {
-      count++;
+export function createXMLParams(params) {
+  let fragment = '';
+  for (let key in params) {
+    if (params.hasOwnProperty(key)) {
+      fragment += tmpl.createParam(key, params[key]);
     }
   }
-
-  return count > 1;
+  return fragment;
 }
+
+/**
+ * 读取projects文件, 返回一个plain object
+ * @return {Object}
+ */
+export function readServicesFile() {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(MARMOT_SERVICES_PATH)) {
+      fs.readFile(MARMOT_SERVICES_PATH, 'utf8', (err, data) => {
+        if (err) return reject(err);
+        let services = JSON.parse(data);
+        resolve(services);
+      });
+    } else {
+      resolve({
+        lastIndex: 0,
+        projects: []
+      });
+    }
+  });
+}
+
+/**
+ * 写入services文件
+ * @param  {Object} services JSONObject
+ * @return {Promise}
+ */
+export function writeServicesFile(services) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(
+      MARMOT_SERVICES_PATH,
+      JSON.stringify(services, null, '  '),
+      (err) => {
+        if (err) return reject(err);
+        resolve(services);
+      }
+    );
+  });
+}
+
+export const services = Object.freeze({
+  /**
+    * 保存服务
+    * @param {String} options.name 项目名
+    * @param {Number} options.port 端口号
+    * @param {Number} options.pid 进程ID
+    * @param {String} options.status 状态
+    * @param {String} options.path 所在目录的路径
+    * @return {Promise}
+   */
+  save(options) {
+    let names = [];
+
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    return readServicesFile()
+      .then((services) => {
+        let projects = services.projects;
+
+        for (let i = 0, item; item = options[i++];) {
+          let {name, port, pid, status, path} = item,
+            project = projects.find((p) => p.name === item.name);
+
+          if (project) {
+            project.port = port;
+            project.pid = pid;
+            project.status = status;
+            project.path = path;
+          } else {
+            services.lastIndex += 1;
+            projects.push({
+              id: services.lastIndex,
+              name,
+              port,
+              pid,
+              status,
+              path
+            });
+          }
+
+          names.push(name);
+        }
+
+        return services;
+      })
+      .then(writeServicesFile)
+      .then(() => names);
+  },
+
+  /**
+   * 根据服务name, id, port查找对应的服务
+   * @param  {Object|Array<Object>} options 参数
+   * @param {String} optoins.name 服务名
+   * @param {Number} optoins.port 服务端口号
+   * @param {String} optoins.name 服务ID
+   * @return {Promise}
+   */
+  find(options) {
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    return readServicesFile()
+      .then((services) => {
+        let projects = services.projects,
+          ret = [];
+
+        for (let i = 0, item; item = options[i++];) {
+          let {name, port, id} = item;
+          for (let j = 0, project; project = projects[j++];) {
+            if (
+              project.name === name ||
+              project.port === port ||
+              project.id === id
+            ) {
+              ret.push(project);
+            }
+          }
+        }
+
+        return ret;
+      });
+  },
+
+  /**
+   * 根据服务name, id, port删除对应的服务
+   * @param  {Object|Array<Object>} options 参数
+   * @param {String} optoins.name 服务名
+   * @param {Number} optoins.port 服务端口号
+   * @param {String} optoins.name 服务ID
+   * @return {Promise}
+   */
+  remove(options) {
+    let names = [];
+
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    return readServicesFile()
+      .then((services) => {
+        let projects = services.projects;
+
+        for (let i = 0, item; item = options[i++];) {
+          let {name, port, id} = item;
+
+          for (let j = 0; j < projects.length; j++) {
+            let project = projects[j];
+            if (
+              project.name === item.name ||
+              project.port === port ||
+              project.id === id
+            ) {
+              names.push(project.name);
+              projects.splice(j, 1);
+            }
+          }
+        }
+
+        return services;
+      })
+      .then(writeServicesFile)
+      .then(() => names);
+  }
+});
+

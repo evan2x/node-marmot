@@ -14,383 +14,351 @@ import chalk from 'chalk';
 import del from 'del';
 
 import * as _ from './helper';
-import * as tmpl from './template';
 import {
   CWD,
-  TOMCAT_PATH,
-  TOMCAT_FILE,
-  TOMCAT_PID
+  JETTY_PATH,
 } from './constants';
 
 /**
- * 检查JDK是否安装及检测JAVA_HOME或者JRE_HOME环境变量是否已设置
+ * 检测是否安装java
  * @return {Promise}
  */
-function checkJDK() {
-  let regex = /\b((?:\d+\.){2}\d+(?:_\d+)?)\b/;
+function checkJava() {
   return new Promise((resolve, reject) => {
-    let jdk = spawn('java', ['-version']),
+    let regex = /\b((?:\d+\.){2}\d+(?:_\d+)?)\b/,
+      java = spawn('java', ['-version']),
       version = null,
       fail = () => {
         console.error(chalk.red('[×] please install the JDK software'));
-        process.exit(1);
         reject();
+        process.exit(1);
       };
 
-    jdk.stderr.on('data', (data) => {
+    java.stderr.on('data', (data) => {
       let ret = data.toString().match(regex);
       if (!version && ret) {
         version = ret[0];
-        console.log('JVM version: %s', version);
-        if (process.env.JAVA_HOME || process.env.JRE_HOME) {
-          resolve();
-        // JAVA_HOME与JRE_HOME全部都未设置时给予用户错误提示
-        } else {
-          console.error(chalk.red('[×] neither the JAVA_HOME nor the JRE_HOME environment variable is defined at least one of these environment variable is needed to run this program'));
-          reject();
-        }
+        console.log('JDK version: %s', version);
+        resolve();
       }
     });
 
-    jdk.on('error', fail).on('exit', () => !version && fail());
+    java
+      .on('error', fail)
+      .on('exit', (data) => {
+        if (!version) {
+          fail();
+        }
+      });
   });
 }
 
 /**
- * 检查tomcat是否安装，没有安装则安装tomcat
+ * 检测端口是否可用
+ * @param  {Number} port 端口号
  * @return {Promise}
  */
-function checkTomcat() {
+function checkPort(port, name) {
   return new Promise((resolve, reject) => {
-    if (fs.existsSync(TOMCAT_PATH)) {
-      resolve();
+    _.services.find({port})
+      .then((projects) => {
+        let project = projects[0];
+        if (project && project.name != name) {
+          reject(new Error(`the port ${port} is be used by ${project.name} service`));
+          return;
+        }
+
+        // 测试端口是否可用
+        let sniffer = net.connect({
+          port
+        }, () => {
+          reject(new Error(`${port} already in use`));
+          sniffer.destroy();
+        });
+
+        sniffer.once('error', () => {
+          resolve(port);
+          sniffer.destroy();
+        });
+      });
+  });
+}
+
+/**
+ * 检查参数
+ * @return {Number}
+ */
+function checkArgs(args) {
+  let {port, name, id} = args;
+
+  if (port != null && (typeof port === 'boolean' || isNaN(port))) {
+    console.error(chalk.red('[×] invalid port'));
+    return false;
+  }
+
+  if (name != null && typeof name !== 'string') {
+    console.error(chalk.red('[×] invalid service name'));
+    return false;
+  }
+
+  if (id != null && (typeof id === 'boolean' || isNaN(id))) {
+    console.error(chalk.red('[×] invalid service id'));
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 纠正name，当name被认为是无效的值，则返回当前所在目录名
+ * @return {String}
+ */
+function correctName(name) {
+  if (typeof name !== 'string' || name === '') {
+    return path.basename(CWD);
+  } else {
+    return name;
+  }
+}
+
+/**
+ * 启动jetty
+ * @param  {Number} port 端口号
+ * @param  {String} name 服务名
+ * @return {Promise}
+ */
+function startJetty(port, name) {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(JETTY_PATH)) {
+      _.services.find({name})
+        .then((projects) => {
+          let project = projects[0] || {},
+            finished = false;
+
+          if (project.pid !== '' && project.status === 'online') {
+            reject(new Error(`the ${name} service has been started using port ${port}`));
+            return;
+          }
+
+          let jetty = spawn('java', [
+            '-jar', JETTY_PATH,
+            '-w', CWD,
+            '-p', port
+          ]);
+
+          jetty.stderr.on('data', (data) => {
+            let chunk = data.toString('utf8');
+
+            // 当输出过异常或成功启动
+            if (finished) return;
+
+            if (/Server[^\r\n]+Started[^\r\n]+/i.test(chunk)) {
+              finished = true;
+              resolve(jetty.pid);
+            }
+            if (chunk.indexOf('Exception') > -1) {
+              finished = true;
+              reject();
+            }
+          });
+
+          jetty.on('error', reject);
+        });
+
     } else {
-      _.untargz({
-        pack: TOMCAT_FILE,
-        target: TOMCAT_PATH,
-        strip: 1
+      reject(new Error('the marmot has been corrupted! please reinstall the marmot'));
+    }
+  });
+}
+
+/**
+ * 停止jetty
+ * @param  {Number} port 端口号
+ * @param  {String} name 项目名
+ * @param  {Number} id   项目ID
+ * @return {Promise}
+ */
+function stopJetty(port, name, id) {
+  return _.services.find({port, name, id})
+    .then((projects) => {
+      for (let i = 0, project; project = projects[i++];) {
+        if (project.pid !== '') {
+          try {
+            // ctrl+c
+            process.kill(project.pid, 'SIGINT');
+            // kill -9
+            process.kill(project.pid, 'SIGKILL');
+          } catch (e) {}
+
+          project.status = 'stopped';
+          project.pid = '';
+        }
+      }
+
+      return projects;
+    })
+    .then(_.services.save);
+}
+
+/**
+ * 启动服务
+ * @todo 项目名未传的情况下会使用当前所在的目录名
+ * @param {Number} port 端口号
+ * @param {String} name 项目名
+ */
+export function start(port, name) {
+  if (!checkArgs({port})) return;
+  name = correctName(name);
+
+  let resolver = Promise.resolve();
+  // 未指定端口号的情况下
+  if (port == null) {
+    resolver = _.services.find({name})
+      .then((projects) => {
+        let project = projects[0];
+        if (project) {
+          port = project.port;
+        } else {
+          // 默认8080
+          port = 8080;
+        }
+      });
+  }
+
+  resolver
+    .then(checkJava)
+    .then(() => checkPort(port, name))
+    .then(() => startJetty(port, name))
+    .then((pid) => new Promise((resolve, reject) => {
+      _.services.save({
+        name,
+        port,
+        pid,
+        status: 'online',
+        path: CWD
       })
       .then(resolve)
-      .catch(reject);
-    }
-  });
-}
-
-/**
- * 执行服务器脚本
- * @param  {String} name 命令名称
- * @return {Child_Process}
- */
-function execCatalinaScript(name) {
-  return new Promise((resolve, reject) => {
-    if (!name) {
-      reject('command name is required');
-    }
-
-    let suffix = '.sh',
-      opts = [name],
-      env = {};
-
-    if (_.isWin()) {
-      suffix = '.bat';
-      env.CATALINA_HOME = TOMCAT_PATH;
-    } else if (name === 'start') {
-      env.CATALINA_PID = TOMCAT_PID;
-    }
-
-    let script = path.join(TOMCAT_PATH, 'bin', `catalina${suffix}`);
-    if (fs.existsSync(script)) {
-      let command = spawn(script, opts, {
-        env: Object.assign(process.env, env)
+      .catch((err) => {
+        // 当保存项目信息出现异常的时候，杀死进程
+        // todo: 低概率事件
+        try {
+          // ctrl+c
+          process.kill(pid, 'SIGINT');
+          // kill -9
+          process.kill(pid, 'SIGKILL');
+        } catch(e) {}
+        reject(err);
       });
-
-      // windows环境下启动时，总是返回成功
-      if (_.isWin() && name === 'start') {
-        resolve();
-      } else {
-        let stdout = '',
-          stderr = '';
-
-        command.stdout.on('data', (data) => {
-          stdout += data;
-        });
-
-        command.stderr.on('data', (data) => {
-          stderr += data;
-        });
-
-        command.on('close', (code) => {
-          if (code === 0) {
-            resolve(stdout);
-          } else {
-            reject(stdout === '' ? stderr : stdout);
-          }
-        });
-      }
-
-      command.on('error', (err) => {
-        reject(err.message);
-      });
-    } else {
-      reject(`${script} not found`);
-    }
-  });
-}
-
-/**
- * kill tomcat process
- * @return {Promise}
- */
-function stopTomcat() {
-  return new Promise((resolve, reject) => {
-    let scriptStop = () => {
-      execCatalinaScript('stop').then(resolve).catch(reject);
-    };
-
-    if (fs.existsSync(TOMCAT_PID)) {
-      let pid = fs.readFileSync(TOMCAT_PID).toString().trim();
-      try {
-        process.kill(pid, 'SIGKILL');
-        del.sync(TOMCAT_PID, {force: true});
-        resolve();
-      } catch (e) {
-        scriptStop();
-      }
-    } else {
-      scriptStop();
-    }
-  });
-}
-
-/**
- * 启动tomcat server
- * @param {Object} opts
- * @param {Boolean} opts.port 端口号
- * @return {Promise}
- */
-function startTomcat(opts = {}) {
-  let options = path.parse(CWD),
-    $ = _.readServerFile(),
-    // 匹配服务是否存在
-    service = $(`Service[name="${options.base}"]`),
-    // 匹配已使用指定端口的connector
-    connector = $(`Connector[port="${opts.port}"]`, 'Service'),
-    /**
-     * 使用tomcat自带脚本启动server
-     * @return {Promise}
-     */
-    startup = () => (
-      execCatalinaScript('start')
-        .then((data) => {
-          // windows下2s后退出当前进程...
-          if (_.isWin()) {
-            setTimeout(() => process.exit(0), 2000);
-          }
-          return data;
-        })
-    ),
-    /**
-     * 检查端口是否被占用
-     * @return {Promise}
-     */
-    checkPort = () => new Promise((resolve, reject) => {
-      // 检查service配置中当前端口是否被占用
-      if (connector[0] && !service.has(connector)[0]) {
-        reject(`port [${opts.port}] is already in use`);
-        return;
-      }
-
-      // 使用net模块创建一个server用来测试端口是否处于可用状态
-      let sniffer = net.createServer();
-
-      sniffer.once('error', () => {
-        // 如果端口被包含在当前服务中，提示为当前服务已占用此端口
-        if (service.has(connector)[0]) {
-          reject(`the current service is already using port [${opts.port}]`);
-        } else {
-          reject(`port [${opts.port}] is already in use`);
-        }
-      });
-
-      sniffer.once('close', resolve);
-      sniffer.listen(opts.port, sniffer.close);
-    }),
-    /**
-     * 设置端口号
-     * @todo 如果指定端口号与当前服务所使用的端口号一致则不设置
-     * @return {Promise}
-     */
-    setPort = () => new Promise((resolve, reject) => {
-      if (!opts.port || service.has(connector)[0]) {
-        resolve();
-        return;
-      }
-
-      if (service[0]) {
-        service.find('Connector').attr('port', opts.port);
-      } else {
-        $('Server').append(tmpl.service({
-          name: options.base,
-          dir: options.dir,
-          port: opts.port
-        }));
-      }
-      _.writeServerFile($.html()).then(resolve).catch(reject);
-    }),
-
-    /**
-     * 清理项目已经删除的相关service
-     * @return {Promise}
-     */
-    cleanService = () => new Promise((resolve, reject) => {
-      $('Service').each((index, item) => {
-        let $item = $(item),
-          docBase = $item.find('Context').attr('docBase') || '',
-          appBase = $item.find('Host').attr('appBase') || '';
-
-        if (!fs.existsSync(path.join(appBase, docBase))) {
-          $item.remove();
-        }
-      });
-
-      _.writeServerFile($.html()).then(resolve).catch(reject);
-    });
-
-  return (
-    checkPort()
-    .then(setPort)
-    .then(stopTomcat)
-    .then(cleanService)
-    .then(startup)
-  );
-}
-
-/**
- * 显示tomcat配置中已经存在的service
- */
-function showServices() {
-  let $ = _.readServerFile(),
-    list = [];
-
-  // 提取services组成二维数组
-  $('Service').each((index, item) => {
-    let $item = $(item),
-      name = $item.attr('name'),
-      port = $item.find('Connector').attr('port'),
-      base = path.join($item.find('Host').attr('appBase'), name);
-    list.push([name, port, base]);
-  });
-
-  _.printTables({
-    head: ['name', 'port', 'path'],
-    body: list
-  });
-}
-
-/**
- * 根据端口号删除对应的service
- * @param  {String} port
- */
-function deleteServiceByPort(port) {
-  if (typeof port === 'boolean') {
-    return;
-  }
-
-  let $ = _.readServerFile(),
-    exists = false;
-
-  $('Connector', 'Service').each((index, item) => {
-    let $item = $(item);
-    if ($item.attr('port') === port) {
-      exists = true;
-      $item.parent().remove();
-      return false;
-    }
-  });
-
-  if (!exists) {
-    console.error(chalk.red(`[×] port "${port}" is not found`));
-    return;
-  }
-
-  _.writeServerFile($.html())
+    }))
     .then(() => {
-      console.log(chalk.green('[√] removed the service'));
-      if (fs.existsSync(TOMCAT_PID)) {
-        return startTomcat();
+      console.log(chalk.green('[√] %s service started successfully'), name);
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error(chalk.red('[×] startup server has encountered a error'));
+      err && console.error(chalk.red('[×] %s'), err.message);
+      process.exit(1);
+    });
+}
+
+/**
+ * 停止服务
+ * @param  {Number} port 端口号
+ * @param  {String} name 项目名
+ * @param  {Number} name 项目id
+ */
+export function stop(port, name, id) {
+  if (!checkArgs({port, name, id})) return;
+
+  checkJava()
+    .then(() => stopJetty(port, name, id))
+    .then((names) => {
+      if (names.length) {
+        console.log(chalk.green('[√] %s service stopped successfully'), names.join());
+      } else {
+        console.warn(chalk.yellow('[i] didn\'t find any service can be stopped'));
       }
     })
     .catch((err) => {
-      console.error(chalk.log(`[×] ${err}`));
+      console.error(chalk.red('[×] stopped server has encountered a error'));
+      console.error(chalk.red('[×] %s'), err.message);
     });
 }
 
-export default function(options) {
-  // 检查启动，停止以及重启是否有两个以上参数同时存在
-  if (_.checkParamsMutex([options.start, options.stop, options.restart])) {
-    console.error(chalk.red('[×] \'-s, --start\', \'-S, --stop\', \'-r, --restart\' are mutually exclusive'));
-    return;
-  }
+/**
+ * 删除服务
+ * @param {Number} port 根据端口号删除
+ * @param {String} name 根据服务名删除
+ * @param {Number} id 根据服务ID删除
+ */
+export function remove(port, name, id) {
+  let opts = {port, name, id};
+  if (!checkArgs(opts)) return;
 
-  // 打印已配置的服务列表
-  if (options.list) {
-    showServices();
-    return;
-  }
-
-  // 根据服务的端口号删除相关的配置项
-  if (options.delete) {
-    deleteServiceByPort(options.delete);
-    return;
-  }
-
-  let clean = null;
-  // 存在-c, --clean的话停止tomcat进程并删除已配置的tomcat
-  if (options.clean) {
-    clean = stopTomcat().then(() => del(TOMCAT_PATH, {force: true}));
-  }
-
-  if (options.start || options.stop || options.restart) {
-    Promise.resolve(clean)
-      .then(checkJDK)
-      .then(checkTomcat)
-      .then(() => {
-        if (options.start) {
-
-          startTomcat({
-            port: options.port
-          })
-          .then(() => {
-            console.log(chalk.green('[√] tomcat server started'));
-          })
-          .catch((err) => {
-            console.error(chalk.red('[×] starting tomcat server has encountered a error'));
-            err && console.error(chalk.red(`[×] ${err}`));
-          });
-
-        } else if (options.stop) {
-
-          stopTomcat()
-          .then(() => {
-            console.log(chalk.green('[√] tomcat server stopped'));
-          })
-          .catch((err) => {
-            console.error(chalk.red('[×] stopping tomcat server has encountered a error'));
-            err && console.error(chalk.red(`[×] ${err}`));
-          });
-
-        } else if (options.restart) {
-
-          stopTomcat()
-          .then(startTomcat)
-          .then(() => {
-            console.log(chalk.green('[√] tomcat server restarted'));
-          })
-          .catch((err) => {
-            console.error(chalk.red('[×] restarting tomcat server has encountered a error'));
-            err && console.error(chalk.red(`[×] ${err}`));
-          });
+  _.services.find(opts)
+    .then((projects) => {
+      for (let i = 0, project; project = projects[i++];) {
+        // 关闭正在运行的服务
+        if (project.pid !== '') {
+          try {
+            // ctrl+c
+            process.kill(project.pid, 'SIGINT');
+            // kill -9
+            process.kill(project.pid, 'SIGKILL');
+          } catch (e) {}
         }
+      }
+
+      return projects;
+    })
+    .then(_.services.remove)
+    .then((names) => {
+      if (names.length) {
+        console.log(chalk.green('[√] %s services removed success'), names.join());
+      } else {
+        console.warn(chalk.yellow('[i] didn\'t find any service can be removed'));
+      }
+    })
+    .catch((err) => {
+      console.error(chalk.red('[×] %s'), err.message);
+    });
+}
+
+/**
+ * 显示所有服务列表
+ */
+export function list() {
+  _.readServicesFile()
+    .then((services) => {
+      let list = [],
+        projects = services.projects;
+
+      list = projects.map((p) => {
+
+        p.name = chalk.cyan(p.name);
+
+        if (p.status === 'online') {
+          p.status = chalk.green(p.status);
+        } else if (p.status === 'stopped') {
+          p.status = chalk.red(p.status);
+        }
+
+        return [
+          p.id,
+          p.name,
+          p.port,
+          p.pid,
+          p.status,
+          p.path
+        ];
       });
-  }
+
+      _.printTables({
+        head: ['id', 'name', 'port', 'pid', 'status', 'path'],
+        body: list
+      });
+    })
+    .catch((err) => {
+      console.error(chalk.red('[×] %s'), err.message);
+    });
 }

@@ -20,9 +20,14 @@ export let common = [
       'freemarker'
     ],
     validate(input) {
-      if (input.length > 0) {
-        this.async()(true);
+      let done = this.async();
+
+      if (input.length === 0) {
+        done('you need to choice a template engine');
+        return;
       }
+
+      done(null, true);
     }
   },
   {
@@ -43,9 +48,14 @@ export let common = [
     'default': '/router/main.xml',
     type: 'input',
     validate(input) {
-      if (input.endsWith('.xml')) {
-        this.async()(true);
+      let done = this.async();
+
+      if (!input.endsWith('.xml')) {
+        done('you need to provide a XML format file');
+        return;
       }
+
+      done(null, true);
     }
   }
 ];
@@ -63,13 +73,18 @@ export let velocity = [
     type: 'input'
   },
   {
-    name: 'toolbox',
-    message: 'Enter a velocity toolbox.xml file(it must be a .xml file)',
+    name: 'tools',
+    message: 'Enter a velocity tools.xml file(it must be a .xml file)',
     type: 'input',
     validate(input) {
-      if (input.trim() === '' || input.endsWith('.xml')) {
-        this.async()(true);
+      let done = this.async();
+
+      if (input.trim() !== '' && input.endsWith('.xml')) {
+        done('you need to provide a XML format file');
+        return;
       }
+
+      done(null, true);
     }
   }
 ];

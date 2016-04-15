@@ -12,7 +12,7 @@ import * as _ from './helper';
  * @return {String}
  */
 function freemarker(params) {
-  return _.serializeXMLParams({
+  return _.createXMLParams({
     tag_syntax: params.tagSyntax, // eslint-disable-line camelcase
     TemplatePath: params.template,
     template_update_delay: 0, // eslint-disable-line camelcase
@@ -27,18 +27,16 @@ function freemarker(params) {
  * @return {String}
  */
 export function velocity(params) {
-
   return (
 `input.encoding = UTF-8
 output.encoding = UTF-8
 resource.loader = webapp
-webapp.resource.loader.class = org.apache.velocity.tools.view.servlet.WebappLoader
+webapp.resource.loader.class = org.apache.velocity.tools.view.WebappResourceLoader
 webapp.resource.loader.path = /${params.template}
 webapp.resource.loader.cache = false
 webapp.resource.loader.modificationCheckInterval = 0
 tools.view.servlet.layout.directory = /`
   );
-
 }
 
 /**
@@ -48,36 +46,12 @@ tools.view.servlet.layout.directory = /`
 export let router = (
   `<?xml version="1.0" encoding="UTF-8"?>
   <router>
-    <route-map>
+    <routes>
       <!-- <route rule="/" location="/index.vm"/> -->
-    </route-map>
+    </routes>
     <!-- <import src="product.xml"/> -->
   </router>`
 );
-
-/**
- * 生成一个tomcat service
- * @param  {Object} conf 配置文件
- * @return {String}
- */
-export function service(conf) {
-  return (
-    `<Service name="${conf.name}">
-       <Connector port="${conf.port}" protocol="HTTP/1.1"
-                   connectionTimeout="20000"
-                   redirectPort="8443"
-                   compression="on"
-                   compressionMinSize="2048"
-                   compressableMimeType="text/html,text/xml,text/css,text/plain,text/javascript,application/javascript" />
-       <Engine name="${conf.name}" defaultHost="localhost">
-         <Host name="localhost"  appBase="${conf.dir}" unpackWARs="true" autoDeploy="true">
-           <Context path="" docBase="${conf.name}" />
-           <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-         </Host>
-       </Engine>
-    </Service>`
-  );
-}
 
 /**
  * 生成servlet配置
@@ -93,11 +67,11 @@ export function servlet(params) {
     case 'velocity':
       props['org.apache.velocity.properties'] = '/WEB-INF/velocity.properties';
 
-      if (params.toolbox) {
-        props['org.apache.velocity.toolbox'] = params.toolbox;
+      if (params.tools) {
+        props['org.apache.velocity.tools'] = params.tools;
       }
 
-      fragment = _.serializeXMLParams(props);
+      fragment = _.createXMLParams(props);
       className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
       break;
 
@@ -117,4 +91,19 @@ export function servlet(params) {
       <url-pattern>*${params.suffix}</url-pattern>
     </servlet-mapping>`
   );
+}
+
+/**
+ * 创建web.xml中的参数配置
+ * @param  {String} key
+ * @param  {String} value
+ * @return {String}
+ */
+export function createParam(key, value) {
+  return (`
+    <init-param>
+      <param-name>${key}</param-name>
+      <param-value>${value}</param-value>
+    </init-param>
+    `);
 }

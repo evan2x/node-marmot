@@ -14,7 +14,25 @@ import path from 'path';
 export const CWD = process.cwd();
 
 /**
- * marmot配置文件
+ * marmot 安装的位置
+ * @type {String}
+ */
+export const MARMOT_PATH = path.resolve(__dirname, '../');
+
+/**
+ * embedded jetty server
+ * @type {String}
+ */
+export const JETTY_PATH = path.join(MARMOT_PATH, 'vendor/embedded-jetty-server-package.jar');
+
+/**
+ * mamrot service配置, 记录各个service的状态
+ * @type {String}
+ */
+export const MARMOT_SERVICES_PATH = path.join(MARMOT_PATH, '.services.json');
+
+/**
+ * marmot service配置文件
  * @type {String}
  */
 export const CONFIG_PATH = path.join(CWD, '.marmotrc');
@@ -35,49 +53,31 @@ export const LIB_PATH = path.join(CWD, 'WEB-INF/lib');
  * velocity配置文件的路径
  * @type {String}
  */
-export const VELOCITY_PATH = path.join(CWD, 'WEB-INF/velocity.properties');
-
-/**
- * tomcat gzip文件
- * @type {String}
- */
-export const TOMCAT_FILE = path.resolve(__dirname, '..', 'vendor/tomcat.tar.gz');
+export const VELOCITY_CONFIG_FILE = path.join(CWD, 'WEB-INF/velocity.properties');
 
 /**
  * velocity gzip文件
  * @type {String}
  */
-export const VELOCITY_FILE = path.resolve(__dirname, '..', 'vendor/velocity.tar.gz');
+export const VELOCITY_FILE = path.join(MARMOT_PATH, 'vendor/velocity.tar.gz');
 
 /**
- * freemarker gzip文件
+ * freemarker jar包名
  * @type {String}
  */
-export const FREEMARKER_FILE = path.resolve(__dirname, '..', 'vendor/freemarker.tar.gz');
+export const FREEMARKER_NAME = 'freemarker-2.3.23.jar';
+
+/**
+ * freemarker jar包
+ * @type {String}
+ */
+export const FREEMARKER_FILE = path.join(MARMOT_PATH, 'vendor', FREEMARKER_NAME);
 
 /**
  * marmot gzip文件
  * @type {String}
  */
-export const MARMOT_INIT_FILE = path.resolve(__dirname, '..', 'vendor/marmot.tar.gz');
-
-/**
- * tomcat
- * @type {String}
- */
-export const TOMCAT_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.__tomcat__');
-
-/**
- * tomcat配置文件
- * @type {String}
- */
-export const SERVER_CONFIG_PATH = path.join(TOMCAT_PATH, 'conf/server.xml');
-
-/**
- * tomcat pid文件
- * @type {String}
- */
-export const TOMCAT_PID = path.join(TOMCAT_PATH, '__pid__');
+export const MARMOT_INIT_FILE = path.join(MARMOT_PATH, 'vendor/marmot.tar.gz');
 
 /**
  * web.xml中filter tag
