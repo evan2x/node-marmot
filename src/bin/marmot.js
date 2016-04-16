@@ -30,6 +30,7 @@ program
     console.log('    $ marmot server list');
   });
 
+// init command
 program
   .command('init')
   .usage('<command> [options]')
@@ -37,6 +38,7 @@ program
   .option('-f, --force', 'forced to initialize WEB-INF directory of the current project')
   .action(init);
 
+// server command
 const commander = program
   .command('server')
   .usage('<command> [options]')
@@ -75,7 +77,7 @@ const commander = program
     }
   });
 
-// 注册server下的commander
+// server sub-command
 commander
   .command('start')
   .description('start a jetty service');

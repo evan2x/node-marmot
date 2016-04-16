@@ -1,6 +1,5 @@
 /**
-* Copyright 2015 creditease Inc. All rights reserved.
-* @description Marmot init questions
+* Marmot init questions
 * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
 * @date  2015/07/27
 */
@@ -18,17 +17,7 @@ export let common = [
     choices: [
       'velocity',
       'freemarker'
-    ],
-    validate(input) {
-      let done = this.async();
-
-      if (input.length === 0) {
-        done('you need to choice a template engine');
-        return;
-      }
-
-      done(null, true);
-    }
+    ]
   },
   {
     name: 'mock',
@@ -48,14 +37,11 @@ export let common = [
     'default': '/router/main.xml',
     type: 'input',
     validate(input) {
-      let done = this.async();
-
       if (!input.endsWith('.xml')) {
-        done('you need to provide a XML format file');
-        return;
+        return 'you need to provide a XML format file';
       }
 
-      done(null, true);
+      return true;
     }
   }
 ];
@@ -70,21 +56,25 @@ export let velocity = [
     name: 'vsuffix',
     message: 'Enter a velocity template file suffix:',
     'default': '.vm',
-    type: 'input'
+    type: 'input',
+    validate(input) {
+      if (!input.endsWith('.')) {
+        return 'you need to provide a correct suffix';
+      }
+
+      return true;
+    }
   },
   {
     name: 'tools',
     message: 'Enter a velocity tools.xml file(it must be a .xml file)',
     type: 'input',
     validate(input) {
-      let done = this.async();
-
       if (input.trim() !== '' && input.endsWith('.xml')) {
-        done('you need to provide a XML format file');
-        return;
+        return 'you need to provide a XML format file';
       }
 
-      done(null, true);
+      return true;
     }
   }
 ];
@@ -99,7 +89,14 @@ export let freemarker = [
     name: 'fsuffix',
     message: 'Enter a freemarker template file suffix:',
     'default': '.ftl',
-    type: 'input'
+    type: 'input',
+    validate(input) {
+      if (!input.endsWith('.')) {
+        return 'you need to provide a correct suffix';
+      }
+
+      return true;
+    }
   },
   {
     name: 'tagSyntax',

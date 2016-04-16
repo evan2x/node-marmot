@@ -1,6 +1,5 @@
 /**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @description Marmot init command
+ * Marmot init project
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */
@@ -238,7 +237,7 @@ export default (command) => {
             return Object.assign(answers, subAnswers);
           });
       } else {
-        return Promise.resolve({});
+        return Promise.resolve(answers);
       }
     };
 
@@ -262,9 +261,7 @@ export default (command) => {
   // common questions
   if (questions.common.length > 0) {
     inquirer.prompt(questions.common)
-      .then((answers) => {
-        return subPrompt(answers.engines || config.engines, answers);
-      })
+      .then((answers) => subPrompt(answers.engines || config.engines, answers))
       .then(initProject);
 
   // freemarker and velocity questions

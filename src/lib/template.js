@@ -1,6 +1,5 @@
 /**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @description Marmot template
+ * Marmot template
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */

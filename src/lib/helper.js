@@ -1,6 +1,5 @@
 /**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @description command helper
+ * helper
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/08/03
  */
@@ -62,7 +61,9 @@ export function readRCFile() {
 
 /**
  * 控制台中打印一张表
- * @param  {Object} tables
+ * @param {Object} table
+ * @param {Array} table.head 表头
+ * @param {Array} table.body 表内容
  * @example
  * {
  *   head: ['name', 'port', 'path'],
@@ -71,14 +72,14 @@ export function readRCFile() {
  *   ]
  * }
  */
-export function printTables(tables = {
+export function printTable(table = {
   head: [],
   body: []
 }) {
   let space = ' ',
     output = '',
     placeholder = '',
-    list = [tables.head, ...tables.body],
+    list = [table.head, ...table.body],
     rowWidth = [],
     margin = space.repeat(2),
     symbols = {
@@ -148,11 +149,11 @@ export function printTables(tables = {
 
   output += breakline(rowWidth, symbols.header);
   // 首行
-  output += createRow(tables.head, rowWidth);
+  output += createRow(table.head, rowWidth);
 
-  for (let i = 0; i < tables.body.length; i++) {
+  for (let i = 0; i < table.body.length; i++) {
     output += breakline(rowWidth, symbols.body);
-    output += createRow(tables.body[i], rowWidth);
+    output += createRow(table.body[i], rowWidth);
   }
 
   output += breakline(rowWidth, symbols.footer);

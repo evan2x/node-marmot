@@ -1,6 +1,5 @@
 /**
- * Copyright 2015 creditease Inc. All rights reserved.
- * @description Marmot server command
+ * Marmot server
  * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
  * @date  2015/07/27
  */
@@ -55,7 +54,8 @@ function checkJava() {
 
 /**
  * 检测端口是否可用
- * @param  {Number} port 端口号
+ * @param  {Number} port
+ * @param  {String} name
  * @return {Promise}
  */
 function checkPort(port, name) {
@@ -123,8 +123,8 @@ function correctName(name) {
 
 /**
  * 启动jetty
- * @param  {Number} port 端口号
- * @param  {String} name 服务名
+ * @param  {Number} port
+ * @param  {String} name
  * @return {Promise}
  */
 function startJetty(port, name) {
@@ -173,9 +173,9 @@ function startJetty(port, name) {
 
 /**
  * 停止jetty
- * @param  {Number} port 端口号
- * @param  {String} name 项目名
- * @param  {Number} id   项目ID
+ * @param  {Number} port 
+ * @param  {String} name
+ * @param  {Number} id 
  * @return {Promise}
  */
 function stopJetty(port, name, id) {
@@ -203,8 +203,8 @@ function stopJetty(port, name, id) {
 /**
  * 启动服务
  * @todo 项目名未传的情况下会使用当前所在的目录名
- * @param {Number} port 端口号
- * @param {String} name 项目名
+ * @param {Number} port
+ * @param {String} name
  */
 export function start(port, name) {
   if (!checkArgs({port})) return;
@@ -263,9 +263,9 @@ export function start(port, name) {
 
 /**
  * 停止服务
- * @param  {Number} port 端口号
- * @param  {String} name 项目名
- * @param  {Number} name 项目id
+ * @param  {Number} port
+ * @param  {String} name
+ * @param  {Number} id
  */
 export function stop(port, name, id) {
   if (!checkArgs({port, name, id})) return;
@@ -287,9 +287,9 @@ export function stop(port, name, id) {
 
 /**
  * 删除服务
- * @param {Number} port 根据端口号删除
- * @param {String} name 根据服务名删除
- * @param {Number} id 根据服务ID删除
+ * @param {Number} port 
+ * @param {String} name 
+ * @param {Number} id
  */
 export function remove(port, name, id) {
   let opts = {port, name, id};
@@ -353,7 +353,7 @@ export function list() {
         ];
       });
 
-      _.printTables({
+      _.printTable({
         head: ['id', 'name', 'port', 'pid', 'status', 'path'],
         body: list
       });
