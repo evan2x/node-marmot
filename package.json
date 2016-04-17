@@ -1,7 +1,7 @@
 {
   "name": "marmot",
   "version": "0.6.0-alpha.2",
-  "description": "A platform for velocity and freemarker template parsing",
+  "description": "A mock server of the Java platform",
   "bin": {
     "marmot": "bin/marmot.js"
   },
