@@ -1,8 +1,3 @@
-/**
-* Marmot init questions
-* @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
-* @date  2015/07/27
-*/
 
 /**
 * common questions

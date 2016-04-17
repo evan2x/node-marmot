@@ -1,8 +1,4 @@
-/**
- * Marmot template
- * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
- * @date  2015/07/27
- */
+
 import * as _ from './helper';
 
 /**

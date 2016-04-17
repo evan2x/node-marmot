@@ -1,8 +1,3 @@
-/**
- * helper
- * @author evan2x(evan2zaw@gmail.com/aiweizhang@creditease.cn)
- * @date  2015/08/03
- */
 
 import path from 'path';
 import fs from 'fs';
