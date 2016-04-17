@@ -125,7 +125,7 @@ $ marmot server stop -p <port>
 $ marmot server stop -p 8090
 ```
 
-关闭 `8080` 端口所对应的服务
+关闭 `8090` 端口所对应的服务
 
 示例2:
 
@@ -169,7 +169,7 @@ $ marmot server rm -p <port>
 $ marmot server rm -p 8090
 ```
 
-移除 `8080` 端口所对应的服务
+移除 `8090` 端口所对应的服务
 
 示例2:
 
@@ -217,10 +217,10 @@ $ marmot server ls
 <!-- router/main.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <router>
-  <import src="product.xml" />
   <cookies>
-    <cookie name="JSESSIONID" value="jstl9vqr6dket28u0xreps9e" />
+    <cookie name="JSESSIONID" value="jstl9vqr6dket28u0xreps9e" http-only="true" />
   </cookies>
+  <import src="product.xml" />
   <routes>
     <route rule="/" location="/index.vm" />
     <route rule="/api/v1/user.json" provider="http://127.0.0.1:3000" />
@@ -280,6 +280,64 @@ http://127.0.0.1:8080/user/info.json
 
 实际上将从以下url中获取数据
 http://x.x.x.x:3000/user/info.json
+```
+
+### `cookies` 标签
+
+此标签用于包含所有的 `cookie` 设置，**该标签应放在 `router` 标签下的第一个位置**，如此才会应用于所有路由规则中。
+
+示例:
+
+```xml
+<!-- main.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<router>
+  <cookies>
+    <cookie 
+      name="JSESSIONID" 
+      value="jstl9vqr6dket28u0xreps9e" 
+      http-only="true" 
+    />
+    <cookie 
+      name="accessToken" 
+      value="jstl9vqr6dket28u0xreps9e" 
+      max-age="3600"
+      http-only="true" 
+    />
+  </cookies>
+  <import src="product.xml">
+  <routes>
+    <route rule="/" location="/index.vm">  
+  </routes>
+</router>
+```
+
+### `cookie` 标签
+
+设置一条cookie
+
+属性:
+
+* `name` cookie名称
+* `value` cookie值
+* `domain` cookie适用的域名，通常没必要设置
+* `path` 在指定的访问路径下发起请求，cookie才会被携带
+* `max-age` cookie最大存活期，单位: 秒
+* `http-only` 默认false，当设置为true时，该cookie在浏览器端不可被JS读取
+
+示例:
+
+```xml
+<cookies>
+  <cookie 
+    name="accessToken" 
+    value="abj3de2vjqp43mf2dd9fj1fd"
+    domain="localhost"
+    path="/profile"
+    max-age="3600"
+    http-only="true"
+  />
+</cookies>
 ```
 
 ### `import` 标签
