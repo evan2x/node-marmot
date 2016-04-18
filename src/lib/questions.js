@@ -53,7 +53,7 @@ export let velocity = [
     'default': '.vm',
     type: 'input',
     validate(input) {
-      if (!input.endsWith('.')) {
+      if (!input.startsWith('.')) {
         return 'you need to provide a correct suffix';
       }
 
@@ -86,7 +86,7 @@ export let freemarker = [
     'default': '.ftl',
     type: 'input',
     validate(input) {
-      if (!input.endsWith('.')) {
+      if (!input.startsWith('.')) {
         return 'you need to provide a correct suffix';
       }
 

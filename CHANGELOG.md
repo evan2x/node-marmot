@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0-alpha.3
+
+* bugfix
+
 # 0.6.0-alpha.1
 
 * Servlet容器由Tomcat改为Jetty，默认支持JSP, JSTL, EL。
