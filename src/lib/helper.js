@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import tar from 'tar';
 import {pd} from 'pretty-data';
 import cheerio from 'cheerio';
+import mkdirp from 'mkdirp';
 import * as tmpl from './template';
 
 import {
@@ -177,6 +178,9 @@ export function createXMLParams(params) {
  */
 export function readServicesFile() {
   return new Promise((resolve, reject) => {
+    let dirname = path.dirname(MARMOT_SERVICES_PATH);
+    if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
+
     if (fs.existsSync(MARMOT_SERVICES_PATH)) {
       fs.readFile(MARMOT_SERVICES_PATH, 'utf8', (err, data) => {
         if (err) return reject(err);
@@ -199,6 +203,9 @@ export function readServicesFile() {
  */
 export function writeServicesFile(services) {
   return new Promise((resolve, reject) => {
+    let dirname = path.dirname(MARMOT_SERVICES_PATH);
+    if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
+
     fs.writeFile(
       MARMOT_SERVICES_PATH,
       JSON.stringify(services, null, '  '),

@@ -8,6 +8,12 @@ import path from 'path';
 export const CWD = process.cwd();
 
 /**
+ * 用户家目录
+ * @type {String}
+ */
+export const HOME = process.env.HOME || process.env.USERPROFILE;
+
+/**
  * marmot 安装的位置
  * @type {String}
  */
@@ -23,7 +29,7 @@ export const JETTY_PATH = path.join(MARMOT_PATH, 'vendor/embedded-jetty-server-p
  * mamrot service配置, 记录各个service的状态
  * @type {String}
  */
-export const MARMOT_SERVICES_PATH = path.join(MARMOT_PATH, '.services.json');
+export const MARMOT_SERVICES_PATH = path.join(HOME, '.marmot/services.json');
 
 /**
  * marmot service配置文件
