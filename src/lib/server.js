@@ -139,7 +139,9 @@ function startJetty(port, name) {
             '-jar', JETTY_PATH,
             '-w', CWD,
             '-p', port
-          ]);
+          ], {
+            detached: true
+          });
 
           jetty.stderr.on('data', (data) => {
             let chunk = data.toString('utf8');
@@ -168,9 +170,9 @@ function startJetty(port, name) {
 
 /**
  * 停止jetty
- * @param  {Number} port 
+ * @param  {Number} port
  * @param  {String} name
- * @param  {Number} id 
+ * @param  {Number} id
  * @return {Promise}
  */
 function stopJetty(port, name, id) {
@@ -282,8 +284,8 @@ export function stop(port, name, id) {
 
 /**
  * 删除服务
- * @param {Number} port 
- * @param {String} name 
+ * @param {Number} port
+ * @param {String} name
  * @param {Number} id
  */
 export function remove(port, name, id) {
