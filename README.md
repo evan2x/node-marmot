@@ -247,7 +247,9 @@ $ marmot server ls
 
 #### `provider` 属性
 
-该属性作用于整个路由文件中，`provider` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 服务的协议作为缺省值
+该属性作用于整个路由文件中，`provider` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 服务的协议作为缺省值。
+
+由 `Marmot` 通过 `provider` 转发的请求，Request Headers中会包含 `X-Requested-With: MarmotHttpRequest` 字段。
 
 有效的HTTP地址：
 
