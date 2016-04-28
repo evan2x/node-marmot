@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0-alpha.6
+
+* bugfix and optimize code
+
 # 0.6.0-alpha.3
 
 * bugfix
