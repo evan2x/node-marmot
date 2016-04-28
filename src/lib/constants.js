@@ -23,7 +23,7 @@ export const MARMOT_PATH = path.resolve(__dirname, '../');
  * embedded jetty server
  * @type {String}
  */
-export const JETTY_PATH = path.join(MARMOT_PATH, 'vendor/embedded-jetty-server-package.jar');
+export const JETTY_PATH = path.join(MARMOT_PATH, 'vendor/embedded-jetty-server-standalone.jar');
 
 /**
  * mamrot service配置, 记录各个service的状态

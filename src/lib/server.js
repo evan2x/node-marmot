@@ -5,12 +5,11 @@ import net from 'net';
 import {spawn} from 'child_process';
 
 import chalk from 'chalk';
-import del from 'del';
 
 import * as _ from './helper';
 import {
   CWD,
-  JETTY_PATH,
+  JETTY_PATH
 } from './constants';
 
 /**
@@ -39,7 +38,7 @@ function checkJava() {
 
     java
       .on('error', fail)
-      .on('exit', (data) => {
+      .on('exit', () => {
         if (!version) {
           fail();
         }
@@ -55,10 +54,11 @@ function checkJava() {
  */
 function checkPort(port, name) {
   return new Promise((resolve, reject) => {
-    _.services.find({port})
+    _.service.find({port})
       .then((projects) => {
         let project = projects[0];
-        if (project && project.name != name) {
+        
+        if (project && project.name !== name) {
           reject(new Error(`the port ${port} is be used by ${project.name} service`));
           return;
         }
@@ -111,9 +111,9 @@ function checkArgs(args) {
 function correctName(name) {
   if (typeof name !== 'string' || name === '') {
     return path.basename(CWD);
-  } else {
-    return name;
   }
+  
+  return name;
 }
 
 /**
@@ -125,15 +125,17 @@ function correctName(name) {
 function startJetty(port, name) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(JETTY_PATH)) {
-      _.services.find({name})
+      _.service.find({name})
         .then((projects) => {
-          let project = projects[0] || {},
-            finished = false;
-
-          if (project.pid !== '' && project.status === 'online') {
-            reject(new Error(`the ${name} service has been started using port ${port}`));
-            return;
+          let project = projects[0] || {};
+          if (project.pid !== '') {
+            try {
+              process.kill(project.pid, 'SIGKILL');
+            } catch (e) {}
           }
+        })
+        .then(() => {
+          let finished = false;
 
           let jetty = spawn('java', [
             '-jar', JETTY_PATH,
@@ -176,14 +178,11 @@ function startJetty(port, name) {
  * @return {Promise}
  */
 function stopJetty(port, name, id) {
-  return _.services.find({port, name, id})
+  return _.service.find({port, name, id})
     .then((projects) => {
       for (let i = 0, project; project = projects[i++];) {
         if (project.pid !== '') {
           try {
-            // ctrl+c
-            process.kill(project.pid, 'SIGINT');
-            // kill -9
             process.kill(project.pid, 'SIGKILL');
           } catch (e) {}
 
@@ -194,7 +193,7 @@ function stopJetty(port, name, id) {
 
       return projects;
     })
-    .then(_.services.save);
+    .then(_.service.save);
 }
 
 /**
@@ -210,13 +209,12 @@ export function start(port, name) {
   let resolver = Promise.resolve();
   // 未指定端口号的情况下
   if (port == null) {
-    resolver = _.services.find({name})
+    resolver = _.service.find({name})
       .then((projects) => {
         let project = projects[0];
         if (project) {
           port = project.port;
         } else {
-          // 默认8080
           port = 8080;
         }
       });
@@ -227,23 +225,18 @@ export function start(port, name) {
     .then(() => checkPort(port, name))
     .then(() => startJetty(port, name))
     .then((pid) => new Promise((resolve, reject) => {
-      _.services.save({
+      _.service.save({
         name,
         port,
         pid,
         status: 'online',
-        path: CWD
+        pathname: CWD
       })
       .then(resolve)
       .catch((err) => {
-        // 当保存项目信息出现异常的时候，杀死进程
-        // todo: 低概率事件
         try {
-          // ctrl+c
-          process.kill(pid, 'SIGINT');
-          // kill -9
           process.kill(pid, 'SIGKILL');
-        } catch(e) {}
+        } catch (e) {}
         reject(err);
       });
     }))
@@ -292,15 +285,11 @@ export function remove(port, name, id) {
   let opts = {port, name, id};
   if (!checkArgs(opts)) return;
 
-  _.services.find(opts)
+  _.service.find(opts)
     .then((projects) => {
       for (let i = 0, project; project = projects[i++];) {
-        // 关闭正在运行的服务
         if (project.pid !== '') {
           try {
-            // ctrl+c
-            process.kill(project.pid, 'SIGINT');
-            // kill -9
             process.kill(project.pid, 'SIGKILL');
           } catch (e) {}
         }
@@ -308,7 +297,7 @@ export function remove(port, name, id) {
 
       return projects;
     })
-    .then(_.services.remove)
+    .then(_.service.remove)
     .then((names) => {
       if (names.length) {
         console.log(chalk.green('[√] %s services removed success'), names.join());
@@ -327,10 +316,10 @@ export function remove(port, name, id) {
 export function list() {
   _.readServicesFile()
     .then((services) => {
-      let list = [],
+      let body = [],
         projects = services.projects;
 
-      list = projects.map((p) => {
+      body = projects.map((p) => {
 
         p.name = chalk.cyan(p.name);
 
@@ -346,13 +335,13 @@ export function list() {
           p.port,
           p.pid,
           p.status,
-          p.path
+          p.pathname
         ];
       });
 
       _.printTable({
         head: ['id', 'name', 'port', 'pid', 'status', 'path'],
-        body: list
+        body
       });
     })
     .catch((err) => {

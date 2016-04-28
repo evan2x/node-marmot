@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import "babel-polyfill";
+import 'babel-polyfill';
 import program from 'commander';
 import pkg from '../package.json';
 
@@ -53,7 +53,7 @@ const commander = program
       cmd.name = null;
     }
 
-    switch(args[0]) {
+    switch (args[0]) {
       case 'start':
         server.start(cmd.port, cmd.name);
         break;
@@ -98,7 +98,7 @@ commander
 
 program.parse(process.argv);
 
-if (process.argv.length == 2) {
+if (process.argv.length === 2) {
   program.outputHelp();
   process.exit(1);
 }

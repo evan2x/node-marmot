@@ -1,22 +1,16 @@
 
 import path from 'path';
 import fs from 'fs';
-import url from 'url';
-import os from 'os';
 import zlib from 'zlib';
 
 import chalk from 'chalk';
 import tar from 'tar';
-import {pd} from 'pretty-data';
-import cheerio from 'cheerio';
 import mkdirp from 'mkdirp';
 import * as tmpl from './template';
 
 import {
-  CWD,
   CONFIG_PATH,
-  MARMOT_SERVICES_PATH,
-  SERVER_CONFIG_PATH
+  MARMOT_SERVICES_PATH
 } from './constants';
 
 /**
@@ -78,7 +72,7 @@ export function printTable(table = {
     list = [table.head, ...table.body],
     rowWidth = [],
     margin = space.repeat(2),
-    symbols = {
+    tableSymbols = {
       header: {
         l: '┌',
         c: '┬',
@@ -98,20 +92,20 @@ export function printTable(table = {
     /**
      * 分割线
      * @param  {Array}  width    单元格宽度
-     * @param  {Object} symbols  单元格分隔符
+     * @param  {Object} mark  单元格分隔符
      * @return {String}
      */
-    breakline = (width, symbols) => {
-      let line = symbols.l;
+    breakline = (width, mark) => {
+      let line = mark.l;
 
       for (let i = 0; i < width.length; i++) {
         line += '─'.repeat(width[i] + margin.length * 2);
         if (i < width.length - 1) {
-          line += symbols.c;
+          line += mark.c;
         }
       }
 
-      line += symbols.r;
+      line += mark.r;
 
       return `${line}\n`;
     },
@@ -126,7 +120,7 @@ export function printTable(table = {
       let str = '│';
 
       for (let i = 0; i < data.length; i++) {
-        let cell = '' + data[i],
+        let cell = '' + data[i], // eslint-disable-line prefer-template
           len = cell.replace(/\u001b\[\d+m/gi, '').length;
 
         placeholder = space.repeat(Math.max(width[i] - len, 0));
@@ -138,21 +132,21 @@ export function printTable(table = {
 
   list.forEach((item) => {
     rowWidth = item.map((v, i) => {
-      let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length;
+      let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length; // eslint-disable-line prefer-template
       return Math.max(rowWidth[i] || 0, len);
     });
   });
 
-  output += breakline(rowWidth, symbols.header);
+  output += breakline(rowWidth, tableSymbols.header);
   // 首行
   output += createRow(table.head, rowWidth);
 
   for (let i = 0; i < table.body.length; i++) {
-    output += breakline(rowWidth, symbols.body);
+    output += breakline(rowWidth, tableSymbols.body);
     output += createRow(table.body[i], rowWidth);
   }
 
-  output += breakline(rowWidth, symbols.footer);
+  output += breakline(rowWidth, tableSymbols.footer);
 
   process.stdout.write(output);
 }
@@ -217,14 +211,14 @@ export function writeServicesFile(services) {
   });
 }
 
-export const services = Object.freeze({
+export const service = Object.freeze({
   /**
     * 保存服务
     * @param {String} options.name 项目名
     * @param {Number} options.port 端口号
     * @param {Number} options.pid 进程ID
     * @param {String} options.status 状态
-    * @param {String} options.path 所在目录的路径
+    * @param {String} options.pathname 所在目录的路径
     * @return {Promise}
    */
   save(options) {
@@ -239,14 +233,14 @@ export const services = Object.freeze({
         let projects = services.projects;
 
         for (let i = 0, item; item = options[i++];) {
-          let {name, port, pid, status, path} = item,
+          let {name, port, pid, status, pathname} = item,
             project = projects.find((p) => p.name === item.name);
 
           if (project) {
             project.port = port;
             project.pid = pid;
             project.status = status;
-            project.path = path;
+            project.pathname = pathname;
           } else {
             services.lastIndex += 1;
             projects.push({
@@ -255,7 +249,7 @@ export const services = Object.freeze({
               port,
               pid,
               status,
-              path
+              pathname
             });
           }
 
@@ -328,7 +322,7 @@ export const services = Object.freeze({
           for (let j = 0; j < projects.length; j++) {
             let project = projects[j];
             if (
-              project.name === item.name ||
+              project.name === name ||
               project.port === port ||
               project.id === id
             ) {

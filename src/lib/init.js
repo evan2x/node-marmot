@@ -99,7 +99,7 @@ function initWebXML(answers) {
       if (!fs.existsSync(toolsFile)) {
         useTools = false;
         console.warn(
-          chalk.yellow(`[i] %s file does not exist in the current directory, create %s file, execute 'marmot init -f' command again`),
+          chalk.yellow('[i] %s file does not exist in the current directory, create %s file, execute \'marmot init -f\' command again'),
           answers.tools,
           answers.tools
         );
@@ -228,12 +228,10 @@ export default (command) => {
       if (subq.length > 0) {
         return inquirer
           .prompt(subq)
-          .then((subAnswers) => {
-            return Object.assign(answers, subAnswers);
-          });
-      } else {
-        return Promise.resolve(answers);
+          .then((subAnswers) => Object.assign(answers, subAnswers));
       }
+      
+      return Promise.resolve(answers);
     };
 
   if (command.force) {
