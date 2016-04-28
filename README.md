@@ -453,9 +453,9 @@ http://x.x.x.x:8888/movie/list.json
 
 #### `content-type` 属性
 
-该属性用于指明当前规则将被以什么类型的请求被处理，在使用 `provider` 渲染模板时尤为重要。
+该属性用于指定当前规则命中后的响应内容类型。
 
-当使用本地模板渲染远程数据的时候，`content-type` 必须设置为 `text/html` 或 `text/htm`，否则将会直接显示远程地址返回的内容
+**值得注意的是如果你在使用 `provider` 提供的数据渲染本地模板的时候，`content-type` 必须设置为 `text/html` 或 `text/htm`，否则将会直接显示 `provider` 响应的内容**
 
 示例：
 
