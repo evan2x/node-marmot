@@ -425,6 +425,14 @@ http://x.x.x.x:8888/movie/list.json
 <route uri="/xxx" location="xxx.vm">
 ```
 
+#### `redirect` 属性
+
+针对命中的路由进行重定向，**会忽略其他属性如：`location, provider, content-type`**
+
+```xml
+<route rule="/xxx" redirect="/aaa">
+```
+
 #### `location` ~~`target`~~ 属性
 
 `location` 属性表示该规则命中后，指向的本地访问的文件，通常是一个模板文件或者JSON文件，当然也可以是一个JSP文件。
