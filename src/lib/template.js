@@ -27,7 +27,7 @@ export function velocity(params) {
 output.encoding = UTF-8
 resource.loader = webapp
 webapp.resource.loader.class = org.apache.velocity.tools.view.WebappResourceLoader
-webapp.resource.loader.path = /${params.template}
+webapp.resource.loader.path = ${params.template}
 webapp.resource.loader.cache = false
 webapp.resource.loader.modificationCheckInterval = 0
 tools.view.servlet.layout.directory = /`

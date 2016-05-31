@@ -124,6 +124,15 @@ function initWebXML(answers) {
       let servlet = tmpl.servlet(data);
       $(FILTER_MAPPING_TAG).last().after(servlet);
 
+      let template = answers.template;
+      if (template) {
+        if (template.startsWith('/')) {
+          template = template.slice(1);
+        }
+
+        answers.template = `/${template}`;
+      }
+
       let vconf = tmpl.velocity(answers);
       fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
@@ -230,7 +239,7 @@ export default (command) => {
           .prompt(subq)
           .then((subAnswers) => Object.assign(answers, subAnswers));
       }
-      
+
       return Promise.resolve(answers);
     };
 
