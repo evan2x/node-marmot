@@ -2,6 +2,7 @@
 import path from 'path';
 import fs from 'fs';
 import zlib from 'zlib';
+import os from 'os';
 
 import chalk from 'chalk';
 import tar from 'tar';
@@ -209,6 +210,35 @@ export function writeServicesFile(services) {
       }
     );
   });
+}
+
+/**
+ * 获取本地IP及外部访问IP
+ * @return {Object} ip
+ * @return {String} ip.internal 本地IP
+ * @return {String} ip.external 外部访问IP
+ */
+export function ip() {
+  let networkInterfaces = os.networkInterfaces(),
+    internal = [],
+    external = [];
+
+  Object.keys(networkInterfaces).forEach((key) => {
+    networkInterfaces[key].forEach((item) => {
+      if (item.family === 'IPv4') {
+        if (item.internal) {
+          internal.push(item);
+        } else {
+          external.push(item);
+        }
+      }
+    });
+  });
+
+  return {
+    internal: internal.length ? internal[0].address : null,
+    external: external.length ? external[0].address : null
+  }
 }
 
 export const service = Object.freeze({

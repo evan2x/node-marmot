@@ -22,7 +22,7 @@ function checkJava() {
       java = spawn('java', ['-version']),
       version = null,
       fail = () => {
-        console.error(chalk.red('[×] please install the JDK software'));
+        console.error(chalk.red('[×] Please install java in your PATH or set JAVA_HOME'));
         reject();
         process.exit(1);
       };
@@ -31,7 +31,7 @@ function checkJava() {
       let ret = data.toString().match(regex);
       if (!version && ret) {
         version = ret[0];
-        console.log('JDK version: %s', version);
+        console.log(chalk.cyan('JRE version: ') + chalk.magenta('%s'), version);
         resolve();
       }
     });
@@ -57,9 +57,9 @@ function checkPort(port, name) {
     _.service.find({port})
       .then((projects) => {
         let project = projects[0];
-        
+
         if (project && project.name !== name) {
-          reject(new Error(`the port ${port} is be used by ${project.name} service`));
+          reject(new Error(`The port ${port} is be used by ${project.name} service`));
           return;
         }
 
@@ -87,17 +87,17 @@ function checkArgs(args) {
   let {port, name, id} = args;
 
   if (port != null && (typeof port === 'boolean' || isNaN(port))) {
-    console.error(chalk.red('[×] invalid port'));
+    console.error(chalk.red('[×] Invalid port'));
     return false;
   }
 
   if (name != null && typeof name !== 'string') {
-    console.error(chalk.red('[×] invalid service name'));
+    console.error(chalk.red('[×] Invalid service name'));
     return false;
   }
 
   if (id != null && (typeof id === 'boolean' || isNaN(id))) {
-    console.error(chalk.red('[×] invalid service id'));
+    console.error(chalk.red('[×] Invalid service id'));
     return false;
   }
 
@@ -112,7 +112,7 @@ function correctName(name) {
   if (typeof name !== 'string' || name === '') {
     return path.basename(CWD);
   }
-  
+
   return name;
 }
 
@@ -165,7 +165,7 @@ function startJetty(port, name) {
         });
 
     } else {
-      reject(new Error('the marmot has been corrupted! please reinstall the marmot'));
+      reject(new Error('The marmot has been corrupted! please reinstall the marmot'));
     }
   });
 }
@@ -241,11 +241,20 @@ export function start(port, name) {
       });
     }))
     .then(() => {
+      let ip = _.ip();
+
+      console.log('');
+      console.log('Access URLs:');
+      console.log('----------------------');
+      console.log('   Local: ' + chalk.magenta('http://%s:%s'), ip.internal, port);
+      console.log('External: ' + chalk.magenta('http://%s:%s'), ip.external, port);
+      console.log('');
       console.log(chalk.green('[√] %s service started successfully'), name);
+
       process.exit(0);
     })
     .catch((err) => {
-      console.error(chalk.red('[×] startup server has encountered a error'));
+      console.error(chalk.red('[×] Startup server has encountered a error'));
       err && console.error(chalk.red('[×] %s'), err.message);
       process.exit(1);
     });
@@ -266,11 +275,11 @@ export function stop(port, name, id) {
       if (names.length) {
         console.log(chalk.green('[√] %s service stopped successfully'), names.join());
       } else {
-        console.warn(chalk.yellow('[i] didn\'t find any service can be stopped'));
+        console.warn(chalk.yellow('[i] Didn\'t find any service can be stopped'));
       }
     })
     .catch((err) => {
-      console.error(chalk.red('[×] stopped server has encountered a error'));
+      console.error(chalk.red('[×] Stopped server has encountered a error'));
       console.error(chalk.red('[×] %s'), err.message);
     });
 }
@@ -302,7 +311,7 @@ export function remove(port, name, id) {
       if (names.length) {
         console.log(chalk.green('[√] %s services removed success'), names.join());
       } else {
-        console.warn(chalk.yellow('[i] didn\'t find any service can be removed'));
+        console.warn(chalk.yellow('[i] Didn\'t find any service can be removed'));
       }
     })
     .catch((err) => {
