@@ -33,7 +33,7 @@ export let common = [
     type: 'input',
     validate(input) {
       if (!input.endsWith('.xml')) {
-        return 'you need to provide a XML format file';
+        return 'You need to provide a XML format file';
       }
 
       return true;
@@ -54,7 +54,7 @@ export let velocity = [
     type: 'input',
     validate(input) {
       if (!input.startsWith('.')) {
-        return 'you need to provide a correct suffix';
+        return 'You need to provide a correct suffix';
       }
 
       return true;
@@ -66,7 +66,7 @@ export let velocity = [
     type: 'input',
     validate(input) {
       if (input.trim() !== '' && input.endsWith('.xml')) {
-        return 'you need to provide a XML format file';
+        return 'You need to provide a XML format file';
       }
 
       return true;
@@ -87,7 +87,7 @@ export let freemarker = [
     type: 'input',
     validate(input) {
       if (!input.startsWith('.')) {
-        return 'you need to provide a correct suffix';
+        return 'You need to provide a correct suffix';
       }
 
       return true;

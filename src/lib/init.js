@@ -136,7 +136,7 @@ function initWebXML(answers) {
       let vconf = tmpl.velocity(answers);
       fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] velocity initialize is complete'));
+      console.log(chalk.green('[√] Velocity initialize is complete'));
     });
   }
 
@@ -156,7 +156,7 @@ function initWebXML(answers) {
 
       $(FILTER_MAPPING_TAG).last().after(servlet);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] freemarker initialize is complete'));
+      console.log(chalk.green('[√] Freemarker initialize is complete'));
     });
   }
 }
