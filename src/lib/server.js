@@ -198,7 +198,7 @@ function stopJetty(port, name, id) {
 }
 
 /**
- * 启动服务
+ * 启动应用
  * @todo 项目名未传的情况下会使用当前所在的目录名
  * @param {Number} port
  * @param {String} name
@@ -262,7 +262,7 @@ export function start(port, name) {
 }
 
 /**
- * 停止服务
+ * 停止应用
  * @param  {Number} port
  * @param  {String} name
  * @param  {Number} id
@@ -290,7 +290,7 @@ export function stop(port, name, id) {
 }
 
 /**
- * 删除服务
+ * 删除应用
  * @param {Number} port
  * @param {String} name
  * @param {Number} id
@@ -325,7 +325,7 @@ export function remove(port, name, id) {
 }
 
 /**
- * 显示所有服务列表
+ * 显示所有应用列表
  */
 export function list() {
   _.readAppsFile()
