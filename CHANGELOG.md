@@ -1,5 +1,12 @@
 # Marmot ChangeLog
 
+# 0.6.0-beta.2
+
+* 参数 `-n, --name` 改为 `-a, --app`。
+* `stop` 命令在未指定任何参数的情况下，则以当前所在目录的名称作为应用名来关闭应用。
+* `start` 命令启动时打印本地访问地址及外部访问地址。
+* 代码优化。
+
 # 0.6.0-alpha.6
 
 * bugfix and optimize code
