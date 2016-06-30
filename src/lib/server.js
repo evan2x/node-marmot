@@ -13,7 +13,7 @@ import {
 } from './constants';
 
 /**
- * 检测是否安装java
+ * 检测是否安装Java
  * @return {Promise}
  */
 function checkJava() {
@@ -54,12 +54,12 @@ function checkJava() {
  */
 function checkPort(port, name) {
   return new Promise((resolve, reject) => {
-    _.service.find({port})
-      .then((projects) => {
-        let project = projects[0];
+    _.apps.find({port})
+      .then((appList) => {
+        let app = appList[0];
 
-        if (project && project.name !== name) {
-          reject(new Error(`The port ${port} is be used by ${project.name} service`));
+        if (app && app.name !== name) {
+          reject(new Error(`The port ${port} is be used by ${app.name} apps`));
           return;
         }
 
@@ -92,12 +92,12 @@ function checkArgs(args) {
   }
 
   if (name != null && typeof name !== 'string') {
-    console.error(chalk.red('[×] Invalid service name'));
+    console.error(chalk.red('[×] Invalid app name'));
     return false;
   }
 
   if (id != null && (typeof id === 'boolean' || isNaN(id))) {
-    console.error(chalk.red('[×] Invalid service id'));
+    console.error(chalk.red('[×] Invalid app id'));
     return false;
   }
 
@@ -106,6 +106,7 @@ function checkArgs(args) {
 
 /**
  * 纠正name，当name被认为是无效的值，则返回当前所在目录名
+ * @param {String} name
  * @return {String}
  */
 function correctName(name) {
@@ -125,12 +126,12 @@ function correctName(name) {
 function startJetty(port, name) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(JETTY_PATH)) {
-      _.service.find({name})
-        .then((projects) => {
-          let project = projects[0] || {};
-          if (project.pid !== '') {
+      _.apps.find({name})
+        .then((appList) => {
+          let app = appList[0] || {};
+          if (app.pid !== '') {
             try {
-              process.kill(project.pid, 'SIGKILL');
+              process.kill(app.pid, 'SIGKILL');
             } catch (e) {}
           }
         })
@@ -178,22 +179,22 @@ function startJetty(port, name) {
  * @return {Promise}
  */
 function stopJetty(port, name, id) {
-  return _.service.find({port, name, id})
-    .then((projects) => {
-      for (let i = 0, project; project = projects[i++];) {
-        if (project.pid !== '') {
+  return _.apps.find({port, name, id})
+    .then((appList) => {
+      for (let i = 0, app; app = appList[i++];) {
+        if (app.pid !== '') {
           try {
-            process.kill(project.pid, 'SIGKILL');
+            process.kill(app.pid, 'SIGKILL');
           } catch (e) {}
 
-          project.status = 'stopped';
-          project.pid = '';
+          app.status = 'stopped';
+          app.pid = '';
         }
       }
 
-      return projects;
+      return appList;
     })
-    .then(_.service.save);
+    .then(_.apps.save);
 }
 
 /**
@@ -209,11 +210,11 @@ export function start(port, name) {
   let resolver = Promise.resolve();
   // 未指定端口号的情况下
   if (port == null) {
-    resolver = _.service.find({name})
-      .then((projects) => {
-        let project = projects[0];
-        if (project) {
-          port = project.port;
+    resolver = _.apps.find({name})
+      .then((appList) => {
+        let app = appList[0];
+        if (app) {
+          port = app.port;
         } else {
           port = 8080;
         }
@@ -225,7 +226,7 @@ export function start(port, name) {
     .then(() => checkPort(port, name))
     .then(() => startJetty(port, name))
     .then((pid) => new Promise((resolve, reject) => {
-      _.service.save({
+      _.apps.save({
         name,
         port,
         pid,
@@ -246,10 +247,10 @@ export function start(port, name) {
       console.log('');
       console.log('Access URLs:');
       console.log('----------------------');
-      console.log('   Local: ' + chalk.magenta('http://%s:%s'), ip.internal, port);
-      console.log('External: ' + chalk.magenta('http://%s:%s'), ip.external, port);
+      console.log(`   Local: ${chalk.magenta('http://%s:%s')}`, ip.internal, port);
+      console.log(`External: ${chalk.magenta('http://%s:%s')}`, ip.external, port);
       console.log('');
-      console.log(chalk.green('[√] %s service started successfully'), name);
+      console.log(chalk.green('[√] %s app started successfully'), name);
 
       process.exit(0);
     })
@@ -269,13 +270,17 @@ export function start(port, name) {
 export function stop(port, name, id) {
   if (!checkArgs({port, name, id})) return;
 
+  if (port == null && name == null && id == null) {
+    name = correctName(name);
+  }
+
   checkJava()
     .then(() => stopJetty(port, name, id))
-    .then((names) => {
-      if (names.length) {
-        console.log(chalk.green('[√] %s service stopped successfully'), names.join());
+    .then((nameList) => {
+      if (nameList.length) {
+        console.log(chalk.green('[√] %s app stopped successfully'), nameList.join());
       } else {
-        console.warn(chalk.yellow('[i] Didn\'t find any service can be stopped'));
+        console.warn(chalk.yellow('[i] Didn\'t find any app can be stopped'));
       }
     })
     .catch((err) => {
@@ -294,24 +299,24 @@ export function remove(port, name, id) {
   let opts = {port, name, id};
   if (!checkArgs(opts)) return;
 
-  _.service.find(opts)
-    .then((projects) => {
-      for (let i = 0, project; project = projects[i++];) {
-        if (project.pid !== '') {
+  _.apps.find(opts)
+    .then((appList) => {
+      for (let i = 0, app; app = appList[i++];) {
+        if (app.pid !== '') {
           try {
-            process.kill(project.pid, 'SIGKILL');
+            process.kill(app.pid, 'SIGKILL');
           } catch (e) {}
         }
       }
 
-      return projects;
+      return appList;
     })
-    .then(_.service.remove)
-    .then((names) => {
-      if (names.length) {
-        console.log(chalk.green('[√] %s services removed success'), names.join());
+    .then(_.apps.remove)
+    .then((nameList) => {
+      if (nameList.length) {
+        console.log(chalk.green('[√] %s app removed success'), nameList.join());
       } else {
-        console.warn(chalk.yellow('[i] Didn\'t find any service can be removed'));
+        console.warn(chalk.yellow('[i] Didn\'t find any app can be removed'));
       }
     })
     .catch((err) => {
@@ -323,12 +328,12 @@ export function remove(port, name, id) {
  * 显示所有服务列表
  */
 export function list() {
-  _.readServicesFile()
-    .then((services) => {
+  _.readAppsFile()
+    .then((file) => {
       let body = [],
-        projects = services.projects;
+        appList = file.list;
 
-      body = projects.map((p) => {
+      body = appList.map((p) => {
 
         p.name = chalk.cyan(p.name);
 

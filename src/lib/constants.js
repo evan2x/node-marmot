@@ -26,13 +26,13 @@ export const MARMOT_PATH = path.resolve(__dirname, '../');
 export const JETTY_PATH = path.join(MARMOT_PATH, 'vendor/embedded-jetty-server-standalone.jar');
 
 /**
- * mamrot service配置, 记录各个service的状态
+ * mamrot 所有应用的启动配置文件
  * @type {String}
  */
-export const MARMOT_SERVICES_PATH = path.join(HOME, '.marmot/services.json');
+export const MARMOT_APPS_PATH = path.join(HOME, '.marmot/apps.json');
 
 /**
- * marmot service配置文件
+ * marmot 当前应用配置文件
  * @type {String}
  */
 export const CONFIG_PATH = path.join(CWD, '.marmotrc');

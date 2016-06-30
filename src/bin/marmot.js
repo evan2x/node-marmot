@@ -42,24 +42,20 @@ program
 const commander = program
   .command('server')
   .usage('<command> [options]')
-  .option('-p, --port [port]', 'specify the port used to start,stop,delete the service (default: 8080)', parseInt)
-  .option('-i, --id [id]', 'specify the service id used to restart,stop,delete the service', parseInt)
-  .option('-n, --name [name]', 'specify the port used to start,restart,stop,delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'\[\]$\+&%#!~`]+$/)
+  .option('-p, --port [port]', 'specify the port used to start, stop, delete the service (default: 8080)', parseInt)
+  .option('-i, --id [id]', 'specify the service id used to restart, stop, delete the service', parseInt)
+  .option('-a, --app [app]', 'specify the app name used to start, restart, stop, delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'\[\]$\+&%#!~`]+$/)
   .description('a embedded jetty server')
   .action((...args) => {
     let cmd = args[args.length - 1];
 
-    if (typeof cmd.name === 'function') {
-      cmd.name = null;
-    }
-
     switch (args[0]) {
       case 'start':
-        server.start(cmd.port, cmd.name);
+        server.start(cmd.port, cmd.app);
         break;
 
       case 'stop':
-        server.stop(cmd.port, cmd.name, cmd.id);
+        server.stop(cmd.port, cmd.app, cmd.id);
         break;
 
       case 'list':
@@ -69,7 +65,7 @@ const commander = program
 
       case 'remove':
       case 'rm':
-        server.remove(cmd.port, cmd.name, cmd.id);
+        server.remove(cmd.port, cmd.app, cmd.id);
         break;
 
       default:

@@ -11,7 +11,7 @@ import * as tmpl from './template';
 
 import {
   CONFIG_PATH,
-  MARMOT_SERVICES_PATH
+  MARMOT_APPS_PATH
 } from './constants';
 
 /**
@@ -168,45 +168,45 @@ export function createXMLParams(params) {
 }
 
 /**
- * 读取projects文件, 返回一个plain object
+ * 读取apps文件, 返回一个plain object
  * @return {Object}
  */
-export function readServicesFile() {
+export function readAppsFile() {
   return new Promise((resolve, reject) => {
-    let dirname = path.dirname(MARMOT_SERVICES_PATH);
+    let dirname = path.dirname(MARMOT_APPS_PATH);
     if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
 
-    if (fs.existsSync(MARMOT_SERVICES_PATH)) {
-      fs.readFile(MARMOT_SERVICES_PATH, 'utf8', (err, data) => {
+    if (fs.existsSync(MARMOT_APPS_PATH)) {
+      fs.readFile(MARMOT_APPS_PATH, 'utf8', (err, data) => {
         if (err) return reject(err);
-        let services = JSON.parse(data);
-        resolve(services);
+        let apps = JSON.parse(data);
+        resolve(apps);
       });
     } else {
       resolve({
         lastIndex: 0,
-        projects: []
+        list: []
       });
     }
   });
 }
 
 /**
- * 写入services文件
- * @param  {Object} services JSONObject
+ * 写入apps文件
+ * @param  {Object} apps
  * @return {Promise}
  */
-export function writeServicesFile(services) {
+export function writeAppsFile(apps) {
   return new Promise((resolve, reject) => {
-    let dirname = path.dirname(MARMOT_SERVICES_PATH);
+    let dirname = path.dirname(MARMOT_APPS_PATH);
     if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
 
     fs.writeFile(
-      MARMOT_SERVICES_PATH,
-      JSON.stringify(services, null, '  '),
+      MARMOT_APPS_PATH,
+      JSON.stringify(apps, null, '  '),
       (err) => {
         if (err) return reject(err);
-        resolve(services);
+        resolve(apps);
       }
     );
   });
@@ -238,13 +238,13 @@ export function ip() {
   return {
     internal: internal.length ? internal[0].address : null,
     external: external.length ? external[0].address : null
-  }
+  };
 }
 
-export const service = Object.freeze({
+export const apps = Object.freeze({
   /**
-    * 保存服务
-    * @param {String} options.name 项目名
+    * 保存应用
+    * @param {String} options.name 应用名
     * @param {Number} options.port 端口号
     * @param {Number} options.pid 进程ID
     * @param {String} options.status 状态
@@ -258,23 +258,23 @@ export const service = Object.freeze({
       options = [options];
     }
 
-    return readServicesFile()
-      .then((services) => {
-        let projects = services.projects;
+    return readAppsFile()
+      .then((file) => {
+        let appList = file.list;
 
         for (let i = 0, item; item = options[i++];) {
           let {name, port, pid, status, pathname} = item,
-            project = projects.find((p) => p.name === item.name);
+            app = appList.find((p) => p.name === item.name);
 
-          if (project) {
-            project.port = port;
-            project.pid = pid;
-            project.status = status;
-            project.pathname = pathname;
+          if (app) {
+            app.port = port;
+            app.pid = pid;
+            app.status = status;
+            app.pathname = pathname;
           } else {
-            services.lastIndex += 1;
-            projects.push({
-              id: services.lastIndex,
+            file.lastIndex += 1;
+            appList.push({
+              id: file.lastIndex,
               name,
               port,
               pid,
@@ -286,18 +286,18 @@ export const service = Object.freeze({
           names.push(name);
         }
 
-        return services;
+        return file;
       })
-      .then(writeServicesFile)
+      .then(writeAppsFile)
       .then(() => names);
   },
 
   /**
-   * 根据服务name, id, port查找对应的服务
+   * 根据应用name, id, port查找对应的应用
    * @param  {Object|Array<Object>} options 参数
-   * @param {String} optoins.name 服务名
-   * @param {Number} optoins.port 服务端口号
-   * @param {String} optoins.name 服务ID
+   * @param {String} optoins.name 应用名
+   * @param {Number} optoins.port 端口号
+   * @param {String} optoins.name 应用ID
    * @return {Promise}
    */
   find(options) {
@@ -305,20 +305,20 @@ export const service = Object.freeze({
       options = [options];
     }
 
-    return readServicesFile()
-      .then((services) => {
-        let projects = services.projects,
+    return readAppsFile()
+      .then((file) => {
+        let appList = file.list,
           ret = [];
 
         for (let i = 0, item; item = options[i++];) {
           let {name, port, id} = item;
-          for (let j = 0, project; project = projects[j++];) {
+          for (let j = 0, app; app = appList[j++];) {
             if (
-              project.name === name ||
-              project.port === port ||
-              project.id === id
+              app.name === name ||
+              app.port === port ||
+              app.id === id
             ) {
-              ret.push(project);
+              ret.push(app);
             }
           }
         }
@@ -328,11 +328,11 @@ export const service = Object.freeze({
   },
 
   /**
-   * 根据服务name, id, port删除对应的服务
+   * 根据应用name, id, port删除对应的应用
    * @param  {Object|Array<Object>} options 参数
-   * @param {String} optoins.name 服务名
-   * @param {Number} optoins.port 服务端口号
-   * @param {String} optoins.name 服务ID
+   * @param {String} optoins.name 应用名
+   * @param {Number} optoins.port 应用端口号
+   * @param {String} optoins.name 应用ID
    * @return {Promise}
    */
   remove(options) {
@@ -342,29 +342,29 @@ export const service = Object.freeze({
       options = [options];
     }
 
-    return readServicesFile()
-      .then((services) => {
-        let projects = services.projects;
+    return readAppsFile()
+      .then((file) => {
+        let appList = file.list;
 
         for (let i = 0, item; item = options[i++];) {
           let {name, port, id} = item;
 
-          for (let j = 0; j < projects.length; j++) {
-            let project = projects[j];
+          for (let j = 0; j < appList.length; j++) {
+            let app = appList[j];
             if (
-              project.name === name ||
-              project.port === port ||
-              project.id === id
+              app.name === name ||
+              app.port === port ||
+              app.id === id
             ) {
-              names.push(project.name);
-              projects.splice(j, 1);
+              names.push(app.name);
+              appList.splice(j, 1);
             }
           }
         }
 
-        return services;
+        return file;
       })
-      .then(writeServicesFile)
+      .then(writeAppsFile)
       .then(() => names);
   }
 });
