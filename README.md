@@ -7,7 +7,7 @@
 ## 标签库与模板引擎
 
 * JSP/JSTL/EL (默认支持)
-* Velocity 
+* Velocity
 * Freemarker
 
 ## Install
@@ -59,18 +59,18 @@ $ marmot init
 $ marmot server <command>
 ```
 
-**在启动多个服务的时候，服务名称及端口号是不可以重复的**
+**在启动多个应用的时候，应用名称及端口号是不可以重复的**
 
 server 目前一共有4个命令，分别为:
 
-* 启动服务 `marmot server start`
-* 关闭服务 `marmot server stop`
-* 从服务列表中移除服务 `marmot server remove`
-* 显示所有服务列表 `marmot server list`
+* 启动应用 `marmot server start`
+* 关闭应用 `marmot server stop`
+* 从应用列表中移除应用 `marmot server remove`
+* 显示所有应用列表 `marmot server list`
 
 接下来针对每个命令进行详细说明。
 
-#### 启动服务
+#### 启动应用
 
 ```shell
 $ marmot server start
@@ -80,8 +80,8 @@ $ marmot server start
 
 参数：
 
-- `-p, --port` 用于指定服务启动时所使用的端口
-- `-n, --name` 指定服务名，默认会使用当前所在的目录名。
+- `-p, --port` 用于指定应用启动时所使用的端口
+- `-a, --app` 指定应用名，默认会使用当前所在的目录名。
 
 ##### 示例
 
@@ -93,17 +93,17 @@ $ marmot server start
 $ marmot server start -p 8090
 ```
 
-执行以上命令后，服务名称为`cashier` ，端口号为 `8080`
+执行以上命令后，应用名为`cashier` ，端口号为 `8080`
 
 示例2:
 
 ```shell
-$ marmot server start -n cashier-project -p 8009
+$ marmot server start -a cashier-project -p 8009
 ```
 
-执行以上命令后，服务名称为`cashier-project`，端口号为`8009`
+执行以上命令后，应用名为`cashier-project`，端口号为`8009`
 
-#### 关闭服务
+#### 关闭应用
 
 ```shell
 $ marmot server stop -p <port>
@@ -111,13 +111,13 @@ $ marmot server stop -p <port>
 
 参数:
 
-* `-p, --port` 根据端口关闭对应的服务
-* `-n, --name` 根据服务名称关闭对应的服务
-* `-i, --id` 根据服务ID关闭对应的服务，该ID是由初次启动服务时生成的ID。可使用`list`命令查看
+* `-p, --port` 根据端口关闭对应的应用
+* `-a, --app` 根据应用名称关闭对应的应用
+* `-i, --id` 根据应用ID关闭对应的应用，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
 
 ##### 示例
 
-> 关闭服务时，至少需要指定任意一个参数。
+> 关闭应用时，至少需要指定任意一个参数。
 
 示例1:
 
@@ -125,7 +125,7 @@ $ marmot server stop -p <port>
 $ marmot server stop -p 8090
 ```
 
-关闭 `8090` 端口所对应的服务
+关闭 `8090` 端口所对应的应用
 
 示例2:
 
@@ -133,7 +133,7 @@ $ marmot server stop -p 8090
 $ marmot server stop -n cashier-project
 ```
 
-关闭名称为 `cashier-project` 的服务
+关闭名称为 `cashier-project` 的应用
 
 示例3:
 
@@ -141,9 +141,9 @@ $ marmot server stop -n cashier-project
 $ marmot server stop -i 1
 ```
 
-关闭ID为 `1` 的服务
+关闭ID为 `1` 的应用
 
-#### 移除服务
+#### 移除应用
 
 ```shell
 $ marmot server remove -p <port>
@@ -155,13 +155,13 @@ $ marmot server rm -p <port>
 
 参数:
 
-- `-p, --port` 根据端口移除对应的服务
-- `-n, --name` 根据服务名称移除对应的服务
-- `-i, --id` 根据服务ID关闭对应的服务，该ID是由初次启动服务时生成的ID。可使用`list`命令查看
+- `-p, --port` 根据端口移除对应的应用
+- `-a, --app` 根据应用名称移除对应的应用
+- `-i, --id` 根据应用ID关闭对应的应用，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
 
 ##### 示例
 
-> 移除服务时，至少需要指定任意一个参数
+> 移除应用时，至少需要指定任意一个参数
 
 示例1:
 
@@ -169,7 +169,7 @@ $ marmot server rm -p <port>
 $ marmot server rm -p 8090
 ```
 
-移除 `8090` 端口所对应的服务
+移除 `8090` 端口所对应的应用
 
 示例2:
 
@@ -177,7 +177,7 @@ $ marmot server rm -p 8090
 $ marmot server rm -n cashier-project
 ```
 
-移除名称为 `cashier-project` 的服务
+移除名称为 `cashier-project` 的应用
 
 示例3:
 
@@ -185,9 +185,9 @@ $ marmot server rm -n cashier-project
 $ marmot server rm -i 1
 ```
 
-移除ID为 `1` 的服务
+移除ID为 `1` 的应用
 
-#### 显示所有服务列表
+#### 显示所有应用列表
 
 ```shell
 $ marmot server list
@@ -247,7 +247,7 @@ $ marmot server ls
 
 #### `provider` 属性
 
-该属性作用于整个路由文件中，`provider` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 服务的协议作为缺省值。
+该属性作用于整个路由文件中，`provider` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 应用的协议作为缺省值。
 
 由 `Marmot` 通过 `provider` 转发的请求，Request Headers中会包含 `X-Requested-With: MarmotHttpRequest` 字段。
 
@@ -274,7 +274,7 @@ xxx.xxx.xxx
 结果如下：
 
 ```
-当前本地服务为 
+本地访问地址
 http://127.0.0.1:8080
 
 访问以下地址
@@ -295,21 +295,21 @@ http://x.x.x.x:3000/user/info.json
 <?xml version="1.0" encoding="UTF-8"?>
 <router>
   <cookies>
-    <cookie 
-      name="JSESSIONID" 
-      value="jstl9vqr6dket28u0xreps9e" 
-      http-only="true" 
+    <cookie
+      name="JSESSIONID"
+      value="jstl9vqr6dket28u0xreps9e"
+      http-only="true"
     />
-    <cookie 
-      name="accessToken" 
-      value="jstl9vqr6dket28u0xreps9e" 
+    <cookie
+      name="accessToken"
+      value="jstl9vqr6dket28u0xreps9e"
       max-age="3600"
-      http-only="true" 
+      http-only="true"
     />
   </cookies>
   <import src="product.xml">
   <routes>
-    <route rule="/" location="/index.vm">  
+    <route rule="/" location="/index.vm">
   </routes>
 </router>
 ```
@@ -331,8 +331,8 @@ http://x.x.x.x:3000/user/info.json
 
 ```xml
 <cookies>
-  <cookie 
-    name="accessToken" 
+  <cookie
+    name="accessToken"
     value="abj3de2vjqp43mf2dd9fj1fd"
     domain="localhost"
     path="/profile"
@@ -392,7 +392,7 @@ router/
 结果如下：
 
 ```
-当前本地服务为 
+本地访问地址
 http://127.0.0.1:8080
 
 访问以下地址
@@ -648,7 +648,7 @@ JSP：
   Person p = new Person();
   p.setName("evan2x");
   p.setAge(24);
-  
+
   out.print(JSON.toJSONString(p));
 %>
 ```
