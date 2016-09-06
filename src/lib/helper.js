@@ -134,6 +134,7 @@ export function printTable(table = {
   list.forEach((item) => {
     rowWidth = item.map((v, i) => {
       let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length; // eslint-disable-line prefer-template
+
       return Math.max(rowWidth[i] || 0, len);
     });
   });
@@ -159,6 +160,7 @@ export function printTable(table = {
  */
 export function createXMLParams(params) {
   let fragment = '';
+
   for (let key in params) {
     if (params.hasOwnProperty(key)) {
       fragment += tmpl.createParam(key, params[key]);
@@ -174,12 +176,14 @@ export function createXMLParams(params) {
 export function readAppsFile() {
   return new Promise((resolve, reject) => {
     let dirname = path.dirname(MARMOT_APPS_PATH);
+
     if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
 
     if (fs.existsSync(MARMOT_APPS_PATH)) {
       fs.readFile(MARMOT_APPS_PATH, 'utf8', (err, data) => {
         if (err) return reject(err);
         let apps = JSON.parse(data);
+
         resolve(apps);
       });
     } else {
@@ -199,6 +203,7 @@ export function readAppsFile() {
 export function writeAppsFile(apps) {
   return new Promise((resolve, reject) => {
     let dirname = path.dirname(MARMOT_APPS_PATH);
+
     if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
 
     fs.writeFile(
@@ -264,7 +269,7 @@ export const apps = Object.freeze({
 
         for (let i = 0, item; item = options[i++];) {
           let {name, port, pid, status, pathname} = item,
-            app = appList.find((p) => p.name === item.name);
+            app = appList.find(p => p.name === item.name);
 
           if (app) {
             app.port = port;
@@ -312,6 +317,7 @@ export const apps = Object.freeze({
 
         for (let i = 0, item; item = options[i++];) {
           let {name, port, id} = item;
+
           for (let j = 0, app; app = appList[j++];) {
             if (
               app.name === name ||
@@ -351,6 +357,7 @@ export const apps = Object.freeze({
 
           for (let j = 0; j < appList.length; j++) {
             let app = appList[j];
+
             if (
               app.name === name ||
               app.port === port ||

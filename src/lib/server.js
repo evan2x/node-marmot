@@ -29,6 +29,7 @@ function checkJava() {
 
     java.stderr.on('data', (data) => {
       let ret = data.toString().match(regex);
+
       if (!version && ret) {
         version = ret[0];
         console.log(chalk.cyan('JRE version: ') + chalk.magenta('%s'), version);
@@ -59,7 +60,7 @@ function checkPort(port, name) {
         let app = appList[0];
 
         if (app && app.name !== name) {
-          reject(new Error(`The port ${port} is be used by ${app.name} apps`));
+          reject(new Error(`The port ${port} is be used by ${app.name} app`));
           return;
         }
 
@@ -105,6 +106,20 @@ function checkArgs(args) {
 }
 
 /**
+ * 根据pid杀死指定进程
+ * @param {Number}
+ */
+function kill(pid) {
+  if (pid) {
+    try {
+      process.kill(pid, 'SIGKILL');
+    } catch (err) {
+      throw new Error(`pid(${pid}): process kill fail`);
+    }
+  }
+}
+
+/**
  * 纠正name，当name被认为是无效的值，则返回当前所在目录名
  * @param {String} name
  * @return {String}
@@ -129,11 +144,7 @@ function startJetty(port, name) {
       _.apps.find({name})
         .then((appList) => {
           let app = appList[0] || {};
-          if (app.pid !== '') {
-            try {
-              process.kill(app.pid, 'SIGKILL');
-            } catch (e) {}
-          }
+          kill(app.pid);
         })
         .then(() => {
           let finished = false;
@@ -156,9 +167,13 @@ function startJetty(port, name) {
               finished = true;
               resolve(jetty.pid);
             }
+
             if (chunk.indexOf('Exception') > -1) {
+              let err = new Error(chunk);
+
               finished = true;
-              reject();
+              err.pid = jetty.pid;
+              reject(err);
             }
           });
 
@@ -183,10 +198,7 @@ function stopJetty(port, name, id) {
     .then((appList) => {
       for (let i = 0, app; app = appList[i++];) {
         if (app.pid !== '') {
-          try {
-            process.kill(app.pid, 'SIGKILL');
-          } catch (e) {}
-
+          kill(app.pid);
           app.status = 'stopped';
           app.pid = '';
         }
@@ -208,11 +220,13 @@ export function start(port, name) {
   name = correctName(name);
 
   let resolver = Promise.resolve();
+
   // 未指定端口号的情况下
   if (port == null) {
     resolver = _.apps.find({name})
       .then((appList) => {
         let app = appList[0];
+
         if (app) {
           port = app.port;
         } else {
@@ -225,7 +239,7 @@ export function start(port, name) {
     .then(checkJava)
     .then(() => checkPort(port, name))
     .then(() => startJetty(port, name))
-    .then((pid) => new Promise((resolve, reject) => {
+    .then(pid => new Promise((resolve, reject) => {
       _.apps.save({
         name,
         port,
@@ -235,9 +249,7 @@ export function start(port, name) {
       })
       .then(resolve)
       .catch((err) => {
-        try {
-          process.kill(pid, 'SIGKILL');
-        } catch (e) {}
+        err.pid = pid;
         reject(err);
       });
     }))
@@ -256,7 +268,10 @@ export function start(port, name) {
     })
     .catch((err) => {
       console.error(chalk.red('[×] Startup server has encountered a error'));
-      err && console.error(chalk.red('[×] %s'), err.message);
+      if (err) {
+        console.error(chalk.red('[×] %s'), err.message);
+        kill(err.pid);
+      }
       process.exit(1);
     });
 }
@@ -297,16 +312,13 @@ export function stop(port, name, id) {
  */
 export function remove(port, name, id) {
   let opts = {port, name, id};
+
   if (!checkArgs(opts)) return;
 
   _.apps.find(opts)
     .then((appList) => {
       for (let i = 0, app; app = appList[i++];) {
-        if (app.pid !== '') {
-          try {
-            process.kill(app.pid, 'SIGKILL');
-          } catch (e) {}
-        }
+        kill(app.pid);
       }
 
       return appList;

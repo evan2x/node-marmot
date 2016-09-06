@@ -62,6 +62,7 @@ function configureAbout($, answers) {
   // filter-mapping中的MockFilter添加url-pattern
   filterMappingNames.each((index, item) => {
     let $item = $(item);
+
     if ($item.text() === MOCK_FILTER) {
       suffixs.forEach((suffix) => {
         if (suffix) {
@@ -96,6 +97,7 @@ function initWebXML(answers) {
     if (answers.tools) {
       useTools = true;
       let toolsFile = path.join(CWD, answers.tools);
+
       if (!fs.existsSync(toolsFile)) {
         useTools = false;
         console.warn(
@@ -122,9 +124,11 @@ function initWebXML(answers) {
       }
 
       let servlet = tmpl.servlet(data);
+
       $(FILTER_MAPPING_TAG).last().after(servlet);
 
       let template = answers.template;
+
       if (template) {
         if (template.startsWith('/')) {
           template = template.slice(1);
@@ -134,6 +138,7 @@ function initWebXML(answers) {
       }
 
       let vconf = tmpl.velocity(answers);
+
       fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
       console.log(chalk.green('[√] Velocity initialize is complete'));
@@ -186,6 +191,7 @@ function initProject(data) {
   }
 
   const ROUTER_PATH = path.join(CWD, answers.router);
+
   // 不存在则创建路由文件
   if (!exists(ROUTER_PATH)) {
     mkdirp.sync(path.dirname(ROUTER_PATH));
@@ -214,7 +220,7 @@ export default (command) => {
      * @param  {String} key
      * @return {Array}
      */
-    remove = (arr, key) => arr.filter((item) => item.name !== key),
+    remove = (arr, key) => arr.filter(item => item.name !== key),
     /**
      * 子问题
      * @param  {Array}   engines
@@ -237,7 +243,7 @@ export default (command) => {
       if (subq.length > 0) {
         return inquirer
           .prompt(subq)
-          .then((subAnswers) => Object.assign(answers, subAnswers));
+          .then(subAnswers => Object.assign(answers, subAnswers));
       }
 
       return Promise.resolve(answers);
@@ -263,7 +269,7 @@ export default (command) => {
   // common questions
   if (questions.common.length > 0) {
     inquirer.prompt(questions.common)
-      .then((answers) => subPrompt(answers.engines || config.engines, answers))
+      .then(answers => subPrompt(answers.engines || config.engines, answers))
       .then(initProject);
 
   // freemarker and velocity questions
