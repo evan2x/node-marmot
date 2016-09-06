@@ -184,11 +184,6 @@ module.exports = {
   },
   env: {
     node: true,
-    browser: true,
-    es6: true,
-    worker: true,
-    serviceworker: true,
-    mocha: true,
-    jquery: true,
+    es6: true
   }
 }
