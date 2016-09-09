@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0-rc.2
+
+* Bugfix
+
 # 0.6.0-rc.1
 
 * 调整代码风格
