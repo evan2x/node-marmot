@@ -76,7 +76,8 @@ function checkPort(port, name) {
           resolve(port);
           sniffer.destroy();
         });
-      });
+      })
+      .catch(reject);
   });
 }
 
@@ -113,9 +114,7 @@ function kill(pid) {
   if (pid) {
     try {
       process.kill(pid, 'SIGKILL');
-    } catch (err) {
-      throw new Error(`pid(${pid}): process kill fail`);
-    }
+    } catch (err) {}
   }
 }
 
@@ -178,7 +177,8 @@ function startJetty(port, name) {
           });
 
           jetty.on('error', reject);
-        });
+        })
+        .catch(reject);
 
     } else {
       reject(new Error('The marmot has been corrupted! please reinstall the marmot'));
