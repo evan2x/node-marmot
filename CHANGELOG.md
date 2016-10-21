@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0-rc.3
+
+* 在启动项目前先检查项目是否初始化。
+
 # 0.6.0-rc.2
 
 * Bugfix
