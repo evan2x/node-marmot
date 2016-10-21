@@ -9,7 +9,8 @@ import chalk from 'chalk';
 import * as _ from './helper';
 import {
   CWD,
-  JETTY_PATH
+  JETTY_PATH,
+  WEB_XML_PATH
 } from './constants';
 
 /**
@@ -60,7 +61,7 @@ function checkPort(port, name) {
         let app = appList[0];
 
         if (app && app.name !== name) {
-          reject(new Error(`The port ${port} is be used by ${app.name} app`));
+          reject(new Error(`The port ${port} is be used on ${app.name} app`));
           return;
         }
 
@@ -79,6 +80,18 @@ function checkPort(port, name) {
       })
       .catch(reject);
   });
+}
+
+/**
+ * 检测项目是否已经初始化
+ * @return {Promise}
+ */
+function checkInitialized() {
+  if (fs.existsSync(WEB_XML_PATH)) {
+    return Promise.resolve();
+  } else {
+    return Promise.reject(new Error('Please initialize the project first'));
+  }
 }
 
 /**
@@ -238,6 +251,7 @@ export function start(port, name) {
   resolver
     .then(checkJava)
     .then(() => checkPort(port, name))
+    .then(() => checkInitialized())
     .then(() => startJetty(port, name))
     .then(pid => new Promise((resolve, reject) => {
       _.apps.save({
@@ -326,7 +340,7 @@ export function remove(port, name, id) {
     .then(_.apps.remove)
     .then((nameList) => {
       if (nameList.length) {
-        console.log(chalk.green('[√] %s app removed success'), nameList.join());
+        console.log(chalk.green('[√] %s app removed successfully'), nameList.join());
       } else {
         console.warn(chalk.yellow('[i] Didn\'t find any app can be removed'));
       }

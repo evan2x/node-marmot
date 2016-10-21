@@ -101,7 +101,7 @@ function initWebXML(answers) {
       if (!fs.existsSync(toolsFile)) {
         useTools = false;
         console.warn(
-          chalk.yellow('[i] %s file does not exist in the current directory, create %s file, execute \'marmot init -f\' command again'),
+          chalk.yellow('[i] The %s file does not exist in the current directory, if you want to force the creation of %s file, execute the \'marmot init -f\' command again'),
           answers.tools,
           answers.tools
         );
@@ -141,7 +141,7 @@ function initWebXML(answers) {
 
       fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] Velocity initialize is complete'));
+      console.log(chalk.green('[√] Velocity initialized is complete'));
     });
   }
 
@@ -161,7 +161,7 @@ function initWebXML(answers) {
 
       $(FILTER_MAPPING_TAG).last().after(servlet);
       fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] Freemarker initialize is complete'));
+      console.log(chalk.green('[√] Freemarker initialized is complete'));
     });
   }
 }
