@@ -8,7 +8,7 @@
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<router provider="http://10.100.140.13:8082">
+<router>
   <routes>
 	<route rule="/foo/(\w+).html" location="/foo/$1.vm" />
   </routes>
