@@ -420,9 +420,25 @@ http://x.x.x.x:8888/movie/list.json
 
 ```xml
 <!-- 推荐 -->
-<route rule="/xxx" location="xxx.vm">
+<route rule="/foo" location="foo.vm">
 <!-- 不推荐 -->
-<route uri="/xxx" location="xxx.vm">
+<route uri="/foo" location="foo.vm">
+```
+
+我们可以通过正则中的**捕获组`()`**来实现在`location`属性中使用 `$1, $2, $n` 的方式来获取捕获组的值，如果要跳过某些分组不匹配则使用**非捕获组`(?:)`**来进行匹配，其中 `$0` 表示整个匹配的字符串，`$1` 表示第一个捕获组，`$2` 表示第二个捕获组，以此类推。
+
+如下示例：
+
+```xml
+<route rule="/foo/(?:[\w-]+)/(\w+)" location="/$1/foo.vm">
+```
+
+```
+请求地址：
+http://127.0.0.0:8080/foo/bar/baz.html
+
+实际访问模版：
+/baz/foo.vm
 ```
 
 #### `redirect` 属性
