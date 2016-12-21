@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0-rc.6
+
+* 修复路由的无限重定向Bug
+
 # 0.6.0-rc.5
 
 * Velocity模版增加可配置的全局宏
