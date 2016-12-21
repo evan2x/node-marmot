@@ -7,7 +7,7 @@
 export let common = [
   {
     name: 'engines',
-    message: 'Select a template engine:',
+    message: 'Template engine:',
     type: 'checkbox',
     choices: [
       'velocity',
@@ -16,23 +16,23 @@ export let common = [
   },
   {
     name: 'mock',
-    message: 'Enter the mock data directory:',
+    message: 'Mock data directory:',
     'default': 'mock',
     type: 'input'
   },
   {
     name: 'template',
-    message: 'Enter the template directory:',
+    message: 'Template directory:',
     'default': 'views',
     type: 'input'
   },
   {
     name: 'router',
-    message: 'Enter the router file(it must be a .xml file):',
+    message: 'Router file path(it must be a .xml file):',
     'default': '/router/main.xml',
     type: 'input',
-    validate(input) {
-      if (!input.endsWith('.xml')) {
+    validate(value) {
+      if (!value.endsWith('.xml')) {
         return 'You need to provide a XML format file';
       }
 
@@ -48,13 +48,13 @@ export let common = [
 */
 export let velocity = [
   {
-    name: 'vsuffix',
-    message: 'Enter a velocity template file suffix:',
+    name: 'vextension',
+    message: 'Velocity template file extension:',
     'default': '.vm',
     type: 'input',
-    validate(input) {
-      if (!input.startsWith('.')) {
-        return 'You need to provide a correct suffix';
+    validate(value) {
+      if (!value.startsWith('.')) {
+        return 'You need to provide a correct extension';
       }
 
       return true;
@@ -62,13 +62,26 @@ export let velocity = [
   },
   {
     name: 'tools',
-    message: 'Enter a velocity tools.xml file(it must be a .xml file)',
+    message: 'File paths of velocity tools.xml(must be a \'.xml\' file):',
     type: 'input',
-    validate(input) {
-      if (input.trim() !== '' && input.endsWith('.xml')) {
+    validate(value) {
+      if (value.trim() !== '' && value.endsWith('.xml')) {
         return 'You need to provide a XML format file';
       }
 
+      return true;
+    }
+  },
+  {
+    name: 'macro',
+    message(answers) {
+      return `File paths of velocity global macro(must be '${answers.vextension}' file with comma-separated):`;
+    },
+    type: 'input',
+    validate(value, answers) {
+      if (value.trim() !== '' && !value.endsWith(answers.vextension)) {
+        return `You need to provide one or more file paths with ${answers.vextension} extension`;
+      }
       return true;
     }
   }
@@ -81,13 +94,13 @@ export let velocity = [
 */
 export let freemarker = [
   {
-    name: 'fsuffix',
-    message: 'Enter a freemarker template file suffix:',
+    name: 'fextension',
+    message: 'Freemarker template file extension:',
     'default': '.ftl',
     type: 'input',
-    validate(input) {
-      if (!input.startsWith('.')) {
-        return 'You need to provide a correct suffix';
+    validate(value) {
+      if (!value.startsWith('.')) {
+        return 'You need to provide a correct extension';
       }
 
       return true;
@@ -95,7 +108,7 @@ export let freemarker = [
   },
   {
     name: 'tagSyntax',
-    message: 'Select freemarker tag syntax:',
+    message: 'Freemarker tag syntax:',
     'default': 'square_bracket',
     type: 'list',
     choices: [

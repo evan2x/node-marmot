@@ -22,7 +22,7 @@ function freemarker(params) {
  * @return {String}
  */
 export function velocity(params) {
-  return (
+  let velocityProps = (
 `input.encoding = UTF-8
 output.encoding = UTF-8
 resource.loader = webapp
@@ -32,6 +32,15 @@ webapp.resource.loader.cache = false
 webapp.resource.loader.modificationCheckInterval = 0
 tools.view.servlet.layout.directory = /`
   );
+
+  if (params.macro) {
+    velocityProps += `
+velocimacro.library = ${params.macro}
+velocimacro.library.autoreload = true
+    `;
+  }
+
+  return velocityProps;
 }
 
 /**
@@ -73,6 +82,9 @@ export function servlet(params) {
     case 'freemarker':
       fragment = freemarker(params);
       className = 'freemarker.ext.servlet.FreemarkerServlet';
+      break;
+    default:
+      return '';
   }
 
   return (
@@ -83,7 +95,7 @@ export function servlet(params) {
     </servlet>
     <servlet-mapping>
       <servlet-name>${params.name}</servlet-name>
-      <url-pattern>*${params.suffix}</url-pattern>
+      <url-pattern>*${params.extension}</url-pattern>
     </servlet-mapping>`
   );
 }

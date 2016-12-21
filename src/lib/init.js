@@ -40,7 +40,7 @@ import {
 function configureAbout($, answers) {
   let filters = $(FILTER_TAG),
     filterMappingNames = $(FILTER_NAME_TAG, FILTER_MAPPING_TAG),
-    suffixs = [answers.vsuffix, answers.fsuffix];
+    extensions = [answers.vextension, answers.fextension];
 
   // filter中添加配置项
   filters.each((index, item) => {
@@ -64,9 +64,9 @@ function configureAbout($, answers) {
     let $item = $(item);
 
     if ($item.text() === MOCK_FILTER) {
-      suffixs.forEach((suffix) => {
-        if (suffix) {
-          $item.after($('<url-pattern>').text(`*${suffix}`));
+      extensions.forEach((extension) => {
+        if (extension) {
+          $item.after($('<url-pattern>').text(`*${extension}`));
         }
       });
     }
@@ -116,7 +116,7 @@ function initWebXML(answers) {
     .then(() => {
       let data = {
         name: 'velocity',
-        suffix: answers.vsuffix
+        extension: answers.vextension
       };
 
       if (useTools) {
@@ -154,7 +154,7 @@ function initWebXML(answers) {
     .on('close', () => {
       let servlet = tmpl.servlet({
         name: 'freemarker',
-        suffix: answers.fsuffix,
+        extension: answers.fextension,
         tagSyntax: answers.tagSyntax,
         template: answers.template
       });
