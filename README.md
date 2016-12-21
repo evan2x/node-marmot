@@ -41,11 +41,23 @@ $ npm install -g marmot
 $ marmot init
 ```
 
-> 项目下如果存在`.marmotrc`文件，那么会根据文件中的配置进行初始化，如果不存在 `.marmotrc` 文件，执行后会出现问答式的初始化设置，并会生成一个`.marmotrc`
+> 项目下如果存在 `.marmotrc` 配置文件，那么会根据文件中的配置进行初始化，如果不存在 `.marmotrc` 配置文件，执行后会出现问答式的初始化设置，并会生成一个 `.marmotrc` 配置文件
 
 * `marmot init` 主要生成了项目的 `WEB-INF` 目录所需要的jar包及模板引擎的配置。
+
 * 如果您手动删除了 `WEB-INF` 目录，您需要再次运行 `marmot init` 进行项目初始化。
-* 由于 `WEB-INF` 目录是根据`.marmotrc`生成的，所以您在提交代码的时候，无需提交此目录。
+当你要指定一个或多个全局的宏文件时，请修改 `.marmotrc` 配置中的 `macro` 属性，然后重新执行 `marmot init -f` 命令，**该属性当指定多个宏文件的时候用逗号分割，宏文件的路径时相对于指定的模版目录** 如：  
+
+  ```
+  #...
+  "template": "views/",
+  "macro": "common/widget.vm,common/global.vm"
+  #...
+
+  # 以上的宏查找方式的结果时 views/common/widget.vm / views/common/global.vm
+  ```
+
+* 由于 `WEB-INF` 目录是根据 `.marmotrc` 配置文件生成的，所以您在提交代码的时候，无需提交此目录。
 
 参数：
 
@@ -753,4 +765,3 @@ velocity模板 `/index.vm`
 ```
 
 当路由命中后，Marmot直接将请求转发给 `provider`，返回结果由 `provider` 决定。当用于REST API的时候，通常是返回JSON字符串。
-
