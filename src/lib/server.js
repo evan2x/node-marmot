@@ -213,7 +213,7 @@ function stopJetty(port, name, id) {
         if (app.pid !== '') {
           kill(app.pid);
           app.status = 'stopped';
-          app.pid = '';
+          app.pid = '--';
         }
       }
 
@@ -355,12 +355,25 @@ export function remove(port, name, id) {
  */
 export function list() {
   _.readAppsFile()
-    .then((file) => {
-      let body = [],
-        appList = file.list;
+    .then((file) => Promise.all(file.list.map((item) => {
+      if (item.status !== 'online') {
+        return Promise.resolve(item);
+      }
+
+      return _.getProcessByPid(item.pid).then((ret) => {
+        if (!(ret && ret.indexOf(item.pid) > -1 && ret.indexOf(path.basename(JETTY_PATH)) > -1)) {
+          item.pid = '--';
+          item.status = 'stopped';
+          return _.apps.save(item).then(() => item).catch(() => item);
+        }
+
+        return Promise.resolve(item);
+      })
+    })))
+    .then((appList) => {
+      let body = [];
 
       body = appList.map((p) => {
-
         p.name = chalk.cyan(p.name);
 
         if (p.status === 'online') {

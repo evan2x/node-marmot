@@ -3,7 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import zlib from 'zlib';
 import os from 'os';
+import child_process from 'child_process';
 
+import iconv from 'iconv-lite';
 import chalk from 'chalk';
 import tar from 'tar';
 import mkdirp from 'mkdirp';
@@ -218,6 +220,52 @@ export function writeAppsFile(apps) {
 }
 
 /**
+ * 根据pid查找指定进程
+ * @param  {Number} pid 进程id
+ * @return {Promise}
+ */
+export function getProcessByPid(pid) {
+  return new Promise((resolve, reject) => {
+    let proc = null,
+      stdout = [],
+      stderr = [],
+      isWin = process.platform === 'win32';
+
+    if (isWin) {
+      proc = child_process.spawn('cmd', ['/c', `wmic process where ProcessId=${pid} get ProcessId,CommandLine`]);
+    } else {
+      proc = child_process.spawn('ps', ['-p', pid, '-o', 'pid,args']);
+    }
+
+    proc.stdout.on('data', (data) => {
+      stdout.push(data);
+    });
+
+    proc.stderr.on('data', (data) => {
+      stderr.push(data);
+    });
+
+    proc.on('close', () => {
+      if (stderr.length > 0) {
+        let err = Buffer.concat(stderr);
+        reject(new Error(isWin ? err.toString() : iconv.decode(err, 'gbk')));
+      } else {
+        let out = Buffer.concat(stdout);
+
+        if (isWin) {
+          out = iconv.decode(out, 'gbk');
+        } else {
+          out = out.toString();
+        }
+
+        let rows = out.split(os.EOL).filter(row => row && row.trim() !== '');
+        resolve(rows.length >= 2 ? rows[1] : '');
+      }
+    });
+  });
+}
+
+/**
  * 获取本地IP及外部访问IP
  * @return {Object} ip
  * @return {String} ip.internal 本地IP
@@ -375,4 +423,3 @@ export const apps = Object.freeze({
       .then(() => names);
   }
 });
-
