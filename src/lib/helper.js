@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import zlib from 'zlib';
 import os from 'os';
+// eslint-disable-next-line camelcase
 import child_process from 'child_process';
 
 import iconv from 'iconv-lite';
@@ -49,7 +50,19 @@ export function readRCFile() {
   if (!fs.existsSync(CONFIG_PATH)) {
     console.error(chalk.red('[×] .marmotrc file not found, please execute \'marmot init\' command'));
   }
+
   return JSON.parse(fs.readFileSync(CONFIG_PATH));
+}
+
+/**
+ * 路径左侧添加斜杠
+ * @param {String} p
+ * @return {String}
+ */
+export function addLeadingSlash(p) {
+  if (!p) return p;
+
+  return p.charAt(0) === '/' ? p : `/${p}`;
 }
 
 /**
@@ -69,73 +82,78 @@ export function printTable(table = {
   head: [],
   body: []
 }) {
-  let space = ' ',
-    output = '',
-    placeholder = '',
-    list = [table.head, ...table.body],
-    rowWidth = [],
-    margin = space.repeat(2),
-    tableSymbols = {
-      header: {
-        l: '┌',
-        c: '┬',
-        r: '┐'
-      },
-      body: {
-        l: '├',
-        c: '┼',
-        r: '┤'
-      },
-      footer: {
-        l: '└',
-        c: '┴',
-        r: '┘'
-      }
+  let space = ' ';
+  let output = '';
+  let placeholder = '';
+  let list = [table.head, ...table.body];
+  let rowWidth = [];
+  let margin = space.repeat(2);
+
+  const tableSymbols = {
+    header: {
+      l: '┌',
+      c: '┬',
+      r: '┐'
     },
-    /**
-     * 分割线
-     * @param  {Array}  width    单元格宽度
-     * @param  {Object} mark  单元格分隔符
-     * @return {String}
-     */
-    breakline = (width, mark) => {
-      let line = mark.l;
-
-      for (let i = 0; i < width.length; i++) {
-        line += '─'.repeat(width[i] + margin.length * 2);
-        if (i < width.length - 1) {
-          line += mark.c;
-        }
-      }
-
-      line += mark.r;
-
-      return `${line}\n`;
+    body: {
+      l: '├',
+      c: '┼',
+      r: '┤'
     },
-    /**
-     * 创建一行数据
-     * @param  {Number} type
-     * @param  {Array}  data  要打印的数据
-     * @param  {Array}  width 单元格宽度
-     * @return {String}
-     */
-    createRow = (data, width) => {
-      let str = '│';
+    footer: {
+      l: '└',
+      c: '┴',
+      r: '┘'
+    }
+  };
 
-      for (let i = 0; i < data.length; i++) {
-        let cell = '' + data[i], // eslint-disable-line prefer-template
-          len = cell.replace(/\u001b\[\d+m/gi, '').length;
+  /**
+   * 分割线
+   * @param  {Array}  width    单元格宽度
+   * @param  {Object} mark  单元格分隔符
+   * @return {String}
+   */
+  const breakline = (width, mark) => {
+    let line = mark.l;
 
-        placeholder = space.repeat(Math.max(width[i] - len, 0));
-        str += `${margin}${cell}${placeholder}${margin}│`;
+    for (let i = 0; i < width.length; i++) {
+      line += '─'.repeat(width[i] + (margin.length * 2));
+      if (i < width.length - 1) {
+        line += mark.c;
       }
+    }
 
-      return `${str}\n`;
-    };
+    line += mark.r;
+
+    return `${line}\n`;
+  };
+
+  /**
+   * 创建一行数据
+   * @param  {Number} type
+   * @param  {Array}  data  要打印的数据
+   * @param  {Array}  width 单元格宽度
+   * @return {String}
+   */
+  const createRow = (data, width) => {
+    let str = '│';
+
+    for (let i = 0; i < data.length; i++) {
+      // eslint-disable-next-line prefer-template
+      let cell = '' + data[i];
+      let len = cell.replace(/\u001b\[\d+m/gi, '').length;
+
+      placeholder = space.repeat(Math.max(width[i] - len, 0));
+      str += `${margin}${cell}${placeholder}${margin}│`;
+    }
+
+    return `${str}\n`;
+  };
 
   list.forEach((item) => {
     rowWidth = item.map((v, i) => {
-      let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length; // eslint-disable-line prefer-template
+      // eslint-disable-next-line prefer-template
+      let len = ('' + v).replace(/\u001b\[\d+m/gi, '').length;
 
       return Math.max(rowWidth[i] || 0, len);
     });
@@ -163,7 +181,9 @@ export function printTable(table = {
 export function createXMLParams(params) {
   let fragment = '';
 
+  // eslint-disable-next-line no-restricted-syntax
   for (let key in params) {
+    // eslint-disable-next-line no-prototype-builtins
     if (params.hasOwnProperty(key)) {
       fragment += tmpl.createParam(key, params[key]);
     }
@@ -226,10 +246,10 @@ export function writeAppsFile(apps) {
  */
 export function getProcessByPid(pid) {
   return new Promise((resolve, reject) => {
-    let proc = null,
-      stdout = [],
-      stderr = [],
-      isWin = process.platform === 'win32';
+    let proc = null;
+    let stdout = [];
+    let stderr = [];
+    const isWin = process.platform === 'win32';
 
     if (isWin) {
       proc = child_process.spawn('cmd', ['/c', `wmic process where ProcessId=${pid} get ProcessId,CommandLine`]);
@@ -272,9 +292,9 @@ export function getProcessByPid(pid) {
  * @return {String} ip.external 外部访问IP
  */
 export function ip() {
-  let networkInterfaces = os.networkInterfaces(),
-    internal = [],
-    external = [];
+  const networkInterfaces = os.networkInterfaces();
+  let internal = [];
+  let external = [];
 
   Object.keys(networkInterfaces).forEach((key) => {
     networkInterfaces[key].forEach((item) => {
@@ -316,8 +336,8 @@ export const apps = Object.freeze({
         let appList = file.list;
 
         for (let i = 0, item; item = options[i++];) {
-          let {name, port, pid, status, pathname} = item,
-            app = appList.find(p => p.name === item.name);
+          let { name, port, pid, status, pathname } = item;
+          let app = appList.find(p => p.name === item.name);
 
           if (app) {
             app.port = port;
@@ -360,11 +380,11 @@ export const apps = Object.freeze({
 
     return readAppsFile()
       .then((file) => {
-        let appList = file.list,
-          ret = [];
+        const appList = file.list;
+        let ret = [];
 
         for (let i = 0, item; item = options[i++];) {
-          let {name, port, id} = item;
+          let { name, port, id } = item;
 
           for (let j = 0, app; app = appList[j++];) {
             if (
@@ -401,7 +421,7 @@ export const apps = Object.freeze({
         let appList = file.list;
 
         for (let i = 0, item; item = options[i++];) {
-          let {name, port, id} = item;
+          let { name, port, id } = item;
 
           for (let j = 0; j < appList.length; j++) {
             let app = appList[j];

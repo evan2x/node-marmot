@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import net from 'net';
-import {spawn} from 'child_process';
+import { spawn } from 'child_process';
 
 import chalk from 'chalk';
 
@@ -19,14 +19,14 @@ import {
  */
 function checkJava() {
   return new Promise((resolve, reject) => {
-    let regex = /\b((?:\d+\.){2}\d+(?:_\d+)?)\b/,
-      java = spawn('java', ['-version']),
-      version = null,
-      fail = () => {
-        console.error(chalk.red('[×] Please install java in your PATH or set JAVA_HOME'));
-        reject();
-        process.exit(1);
-      };
+    const regex = /\b((?:\d+\.){2}\d+(?:_\d+)?)\b/;
+    const java = spawn('java', ['-version']);
+    let version = null;
+    const fail = () => {
+      console.error(chalk.red('[×] Please install java in your PATH or set JAVA_HOME'));
+      reject();
+      process.exit(1);
+    };
 
     java.stderr.on('data', (data) => {
       let ret = data.toString().match(regex);
@@ -56,7 +56,7 @@ function checkJava() {
  */
 function checkPort(port, name) {
   return new Promise((resolve, reject) => {
-    _.apps.find({port})
+    _.apps.find({ port })
       .then((appList) => {
         let app = appList[0];
 
@@ -89,9 +89,9 @@ function checkPort(port, name) {
 function checkInitialized() {
   if (fs.existsSync(WEB_XML_PATH)) {
     return Promise.resolve();
-  } else {
-    return Promise.reject(new Error('Please initialize the project first'));
   }
+
+  return Promise.reject(new Error('Please initialize the project first'));
 }
 
 /**
@@ -99,7 +99,7 @@ function checkInitialized() {
  * @return {Number}
  */
 function checkArgs(args) {
-  let {port, name, id} = args;
+  let { port, name, id } = args;
 
   if (port != null && (typeof port === 'boolean' || isNaN(port))) {
     console.error(chalk.red('[×] Invalid port'));
@@ -127,6 +127,7 @@ function kill(pid) {
   if (pid) {
     try {
       process.kill(pid, 'SIGKILL');
+    // eslint-disable-next-line no-empty
     } catch (err) {}
   }
 }
@@ -153,7 +154,7 @@ function correctName(name) {
 function startJetty(port, name) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(JETTY_PATH)) {
-      _.apps.find({name})
+      _.apps.find({ name })
         .then((appList) => {
           let app = appList[0] || {};
           kill(app.pid);
@@ -192,7 +193,6 @@ function startJetty(port, name) {
           jetty.on('error', reject);
         })
         .catch(reject);
-
     } else {
       reject(new Error('The marmot has been corrupted! please reinstall the marmot'));
     }
@@ -207,7 +207,7 @@ function startJetty(port, name) {
  * @return {Promise}
  */
 function stopJetty(port, name, id) {
-  return _.apps.find({port, name, id})
+  return _.apps.find({ port, name, id })
     .then((appList) => {
       for (let i = 0, app; app = appList[i++];) {
         if (app.pid !== '') {
@@ -229,14 +229,14 @@ function stopJetty(port, name, id) {
  * @param {String} name
  */
 export function start(port, name) {
-  if (!checkArgs({port})) return;
+  if (!checkArgs({ port })) return;
   name = correctName(name);
 
   let resolver = Promise.resolve();
 
   // 未指定端口号的情况下
   if (port == null) {
-    resolver = _.apps.find({name})
+    resolver = _.apps.find({ name })
       .then((appList) => {
         let app = appList[0];
 
@@ -297,7 +297,7 @@ export function start(port, name) {
  * @param  {Number} id
  */
 export function stop(port, name, id) {
-  if (!checkArgs({port, name, id})) return;
+  if (!checkArgs({ port, name, id })) return;
 
   if (port == null && name == null && id == null) {
     name = correctName(name);
@@ -325,7 +325,7 @@ export function stop(port, name, id) {
  * @param {Number} id
  */
 export function remove(port, name, id) {
-  let opts = {port, name, id};
+  let opts = { port, name, id };
 
   if (!checkArgs(opts)) return;
 
@@ -355,7 +355,7 @@ export function remove(port, name, id) {
  */
 export function list() {
   _.readAppsFile()
-    .then((file) => Promise.all(file.list.map((item) => {
+    .then(file => Promise.all(file.list.map((item) => {
       if (item.status !== 'online') {
         return Promise.resolve(item);
       }
@@ -368,7 +368,7 @@ export function list() {
         }
 
         return Promise.resolve(item);
-      })
+      });
     })))
     .then((appList) => {
       let body = [];

@@ -4,7 +4,7 @@
 * @public
 * @type {Array}
 */
-export let common = [
+export const common = [
   {
     name: 'engines',
     message: 'Template engine:',
@@ -46,7 +46,7 @@ export let common = [
 * @public
 * @type {Array}
 */
-export let velocity = [
+export const velocity = [
   {
     name: 'vextension',
     message: 'Velocity template file extension:',
@@ -92,7 +92,7 @@ export let velocity = [
 * @public
 * @type {Array}
 */
-export let freemarker = [
+export const freemarker = [
   {
     name: 'fextension',
     message: 'Freemarker template file extension:',

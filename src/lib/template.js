@@ -47,7 +47,7 @@ velocimacro.library.autoreload = true
  * 路由配置示例
  * @type {String}
  */
-export let router = (
+export const router = (
   `<?xml version="1.0" encoding="UTF-8"?>
   <router>
     <routes>
@@ -63,9 +63,9 @@ export let router = (
  * @return {String}
  */
 export function servlet(params) {
-  let className = '',
-    fragment = '',
-    props = {};
+  let className = '';
+  let fragment = '';
+  let props = {};
 
   switch (params.name) {
     case 'velocity':

@@ -5,7 +5,7 @@ import path from 'path';
 import inquirer from 'inquirer';
 import mkdirp from 'mkdirp';
 import cheerio from 'cheerio';
-import {pd} from 'pretty-data';
+import { pd } from 'pretty-data';
 import chalk from 'chalk';
 import del from 'del';
 
@@ -38,24 +38,25 @@ import {
  * @param  {Object} answers
  */
 function configureAbout($, answers) {
-  let filters = $(FILTER_TAG),
-    filterMappingNames = $(FILTER_NAME_TAG, FILTER_MAPPING_TAG),
-    extensions = [answers.vextension, answers.fextension];
+  let filters = $(FILTER_TAG);
+  let filterMappingNames = $(FILTER_NAME_TAG, FILTER_MAPPING_TAG);
+  const extensions = [answers.vextension, answers.fextension];
 
   // filter中添加配置项
   filters.each((index, item) => {
     let $item = $(item);
+    const filterName = $item.children(FILTER_NAME_TAG).text();
 
-    switch ($item.children(FILTER_NAME_TAG).text()) {
-      case REWRITE_FILTER:
-        $item.append(_.createXMLParams({
-          routerFile: answers.router
-        }));
-        break;
-      case MOCK_FILTER:
-        $item.append(_.createXMLParams({
-          mockDir: answers.mock
-        }));
+    if (filterName === REWRITE_FILTER) {
+      $item.append(_.createXMLParams({
+        routerFile: answers.router
+      }));
+    }
+
+    if (filterName === MOCK_FILTER) {
+      $item.append(_.createXMLParams({
+        mockDir: answers.mock
+      }));
     }
   });
 
@@ -78,15 +79,16 @@ function configureAbout($, answers) {
  * @param  {Object} answers
  */
 function initWebXML(answers) {
-  let engines = answers.engines,
-    /**
-     * 载入web.xml文件
-     * @type {Object}
-     */
-    $ = cheerio.load(fs.readFileSync(WEB_XML_PATH, 'utf-8'), {
-      normalizeWhitespace: true,
-      xmlMode: true
-    });
+  const engines = answers.engines;
+
+  /**
+   * 载入web.xml文件
+   * @type {Object}
+   */
+  const $ = cheerio.load(fs.readFileSync(WEB_XML_PATH, 'utf-8'), {
+    normalizeWhitespace: true,
+    xmlMode: true
+  });
 
   configureAbout($, answers);
 
@@ -123,18 +125,10 @@ function initWebXML(answers) {
         data.tools = answers.tools;
       }
 
-      let servlet = tmpl.servlet(data);
+      $(FILTER_MAPPING_TAG).last().after(tmpl.servlet(data));
 
-      $(FILTER_MAPPING_TAG).last().after(servlet);
-
-      let template = answers.template;
-
-      if (template) {
-        if (template.startsWith('/')) {
-          template = template.slice(1);
-        }
-
-        answers.template = `/${template}`;
+      if (answers.template) {
+        answers.template = _.addLeadingSlash(answers.template);
       }
 
       let vconf = tmpl.velocity(answers);
@@ -171,8 +165,8 @@ function initWebXML(answers) {
  * @param  {Object} answers
  */
 function initProject(data) {
-  let exists = fs.existsSync,
-    answers = data;
+  const exists = fs.existsSync;
+  let answers = data;
 
   // 配置文件存在的话，读取后合并当前answers
   if (exists(CONFIG_PATH)) {
@@ -213,44 +207,46 @@ function initProject(data) {
 }
 
 export default (command) => {
-  let config = {},
-    /**
-     * 根据key过滤数组中与name不同的数据
-     * @param  {Array} arr
-     * @param  {String} key
-     * @return {Array}
-     */
-    remove = (arr, key) => arr.filter(item => item.name !== key),
-    /**
-     * 子问题
-     * @param  {Array}   engines
-     * @param  {Object} answers
-     * @return {Promise}
-     */
-    subPrompt = (engines, answers = {}) => {
-      let subq = [];
+  let config = {};
 
-      // velocity questions
-      if (engines.includes('velocity')) {
-        subq = [...subq, ...questions.velocity];
-      }
+  /**
+   * 根据key过滤数组中与name不同的数据
+   * @param  {Array} arr
+   * @param  {String} key
+   * @return {Array}
+   */
+  const remove = (arr, key) => arr.filter(item => item.name !== key);
 
-      // freemarker questions
-      if (engines.includes('freemarker')) {
-        subq = [...subq, ...questions.freemarker];
-      }
+  /**
+   * 子问题
+   * @param  {Array}   engines
+   * @param  {Object} answers
+   * @return {Promise}
+   */
+  const subPrompt = (engines, answers = {}) => {
+    let subq = [];
 
-      if (subq.length > 0) {
-        return inquirer
-          .prompt(subq)
-          .then(subAnswers => Object.assign(answers, subAnswers));
-      }
+    // velocity questions
+    if (engines.includes('velocity')) {
+      subq = [...subq, ...questions.velocity];
+    }
 
-      return Promise.resolve(answers);
-    };
+    // freemarker questions
+    if (engines.includes('freemarker')) {
+      subq = [...subq, ...questions.freemarker];
+    }
+
+    if (subq.length > 0) {
+      return inquirer
+        .prompt(subq)
+        .then(subAnswers => Object.assign(answers, subAnswers));
+    }
+
+    return Promise.resolve(answers);
+  };
 
   if (command.force) {
-    del.sync(path.dirname(WEB_XML_PATH), {force: true});
+    del.sync(path.dirname(WEB_XML_PATH), { force: true });
   }
 
   if (fs.existsSync(CONFIG_PATH)) {
@@ -258,7 +254,9 @@ export default (command) => {
   }
 
   // 过滤已经回答过的问题
+  // eslint-disable-next-line no-restricted-syntax
   for (let key in config) {
+    // eslint-disable-next-line no-prototype-builtins
     if (config.hasOwnProperty(key)) {
       questions.common = remove(questions.common, key);
       questions.velocity = remove(questions.velocity, key);

@@ -44,7 +44,7 @@ const commander = program
   .usage('<command> [options]')
   .option('-p, --port [port]', 'specify the port used to start, stop, delete the service (default: 8080)', parseInt)
   .option('-i, --id [id]', 'specify the service id used to restart, stop, delete the service', parseInt)
-  .option('-a, --app [app]', 'specify the app name used to start, restart, stop, delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'\[\]$\+&%#!~`]+$/)
+  .option('-a, --app [app]', 'specify the app name used to start, restart, stop, delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'[\]$+&%#!~`]+$/)
   .description('a embedded jetty server')
   .action((...args) => {
     let cmd = args[args.length - 1];
