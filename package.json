@@ -1,6 +1,6 @@
 {
   "name": "marmot",
-  "version": "0.6.0-rc.7",
+  "version": "0.6.0-rc.8",
   "description": "A mock server of the Java platform",
   "bin": {
     "marmot": "bin/marmot.js"
@@ -18,23 +18,28 @@
   "author": "evan2x",
   "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.14.0",
-    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.14.0",
-    "babel-plugin-transform-es2015-parameters": "^6.11.4",
-    "babel-plugin-transform-es2015-spread": "^6.8.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "eslint": "^3.4.0"
+    "babel-cli": "^6.24.0",
+    "babel-eslint": "^7.2.1",
+    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.0",
+    "babel-plugin-transform-es2015-parameters": "^6.23.0",
+    "babel-plugin-transform-es2015-spread": "^6.22.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.3"
   },
   "dependencies": {
-    "babel-polyfill": "^6.13.0",
-    "babel-runtime": "^6.11.6",
+    "babel-polyfill": "^6.23.0",
+    "babel-runtime": "^6.23.0",
     "chalk": "^1.1.3",
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
     "del": "^2.2.2",
     "iconv-lite": "^0.4.15",
-    "inquirer": "^1.1.3",
+    "inquirer": "^3.0.6",
     "mkdirp": "^0.5.1",
     "pretty-data": "^0.40.0",
     "tar": "^2.2.1"
