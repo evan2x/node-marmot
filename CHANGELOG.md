@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.0
+
+* 修复`marmot server ls`命令打印出错
+
 # 0.6.0-rc.7
 
 * 修复进程被杀掉后，`marmot server ls` 状态显示错误的问题
