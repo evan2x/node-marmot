@@ -72,7 +72,6 @@ const commander = program
         cmd.outputHelp();
     }
   });
-
 // server sub-command
 commander
   .command('start')
@@ -91,6 +90,8 @@ commander
   .command('list')
   .alias('ls')
   .description('list of all services');
+
+commander.command('');
 
 program.parse(process.argv);
 
