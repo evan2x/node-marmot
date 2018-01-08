@@ -248,7 +248,7 @@ export function start(port, name) {
       });
   }
 
-  resolver
+  return resolver
     .then(checkJava)
     .then(() => checkPort(port, name))
     .then(() => checkInitialized())
@@ -303,7 +303,7 @@ export function stop(port, name, id) {
     name = correctName(name);
   }
 
-  checkJava()
+  return checkJava()
     .then(() => stopJetty(port, name, id))
     .then((nameList) => {
       if (nameList.length) {
@@ -316,6 +316,16 @@ export function stop(port, name, id) {
       console.error(chalk.red('[×] Stopped server has encountered a error'));
       console.error(chalk.red('[×] %s'), err.message);
     });
+}
+
+/**
+ * 重启应用
+ * @param  {Number} port
+ * @param  {String} name
+ * @param  {Number} id
+ */
+export function restart(...args) {
+  return stop(...args).then(start(...args));
 }
 
 /**
