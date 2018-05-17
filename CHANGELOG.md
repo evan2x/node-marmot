@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.3
+
+* 修复个别情况下marmot解析应用配置异常的问题
+
 # 0.6.0
 
 * 修复`marmot server ls`命令打印出错

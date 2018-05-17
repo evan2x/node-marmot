@@ -6,6 +6,7 @@ import os from 'os';
 // eslint-disable-next-line camelcase
 import child_process from 'child_process';
 
+import del from 'del';
 import iconv from 'iconv-lite';
 import chalk from 'chalk';
 import tar from 'tar';
@@ -227,6 +228,10 @@ export function writeAppsFile(apps) {
     let dirname = path.dirname(MARMOT_APPS_PATH);
 
     if (!fs.existsSync(dirname)) mkdirp.sync(dirname);
+
+    if (fs.existsSync(MARMOT_APPS_PATH)) {
+      del.sync(MARMOT_APPS_PATH, { force: true });
+    }
 
     fs.writeFile(
       MARMOT_APPS_PATH,
