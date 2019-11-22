@@ -1,5 +1,25 @@
+/**
+ * 创建web.xml格式的参数配置
+ * @param  {Object} params 参数表
+ * @return {String}
+ */
+export function createXMLParams(params) {
+  let fragment = '';
 
-import * as _ from './helper';
+  // eslint-disable-next-line no-restricted-syntax
+  for (let key in params) {
+    // eslint-disable-next-line no-prototype-builtins
+    if (params.hasOwnProperty(key)) {
+      fragment += (`
+        <init-param>
+          <param-name>${key}</param-name>
+          <param-value>${params[key]}</param-value>
+        </init-param>
+      `);
+    }
+  }
+  return fragment;
+}
 
 /**
  * 生成freemarker的配置
@@ -7,7 +27,7 @@ import * as _ from './helper';
  * @return {String}
  */
 function freemarker(params) {
-  return _.createXMLParams({
+  return createXMLParams({
     tag_syntax: params.tagSyntax, // eslint-disable-line camelcase
     TemplatePath: params.template,
     template_update_delay: 0, // eslint-disable-line camelcase
@@ -23,7 +43,7 @@ function freemarker(params) {
  */
 export function velocity(params) {
   let velocityProps = (
-`input.encoding = UTF-8
+    `input.encoding = UTF-8
 output.encoding = UTF-8
 resource.loader = webapp
 webapp.resource.loader.class = org.apache.velocity.tools.view.WebappResourceLoader
@@ -75,7 +95,7 @@ export function servlet(params) {
         props['org.apache.velocity.tools'] = params.tools;
       }
 
-      fragment = _.createXMLParams(props);
+      fragment = createXMLParams(props);
       className = 'org.apache.velocity.tools.view.VelocityLayoutServlet';
       break;
 
@@ -98,19 +118,4 @@ export function servlet(params) {
       <url-pattern>*${params.extension}</url-pattern>
     </servlet-mapping>`
   );
-}
-
-/**
- * 创建web.xml中的参数配置
- * @param  {String} key
- * @param  {String} value
- * @return {String}
- */
-export function createParam(key, value) {
-  return (`
-    <init-param>
-      <param-name>${key}</param-name>
-      <param-value>${value}</param-value>
-    </init-param>
-    `);
 }

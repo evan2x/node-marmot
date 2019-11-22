@@ -32,7 +32,7 @@ function checkJava() {
       let ret = data.toString().match(regex);
 
       if (!version && ret) {
-        version = ret[0];
+        [version] = ret;
         console.log(chalk.cyan('JRE version: ') + chalk.magenta('%s'), version);
         resolve();
       }
@@ -101,7 +101,7 @@ function checkInitialized() {
 function checkArgs(args) {
   let { port, name, id } = args;
 
-  if (port != null && (typeof port === 'boolean' || isNaN(port))) {
+  if (port != null && (typeof port === 'boolean' || Number.isNaN(port))) {
     console.error(chalk.red('[×] Invalid port'));
     return false;
   }
@@ -111,7 +111,7 @@ function checkArgs(args) {
     return false;
   }
 
-  if (id != null && (typeof id === 'boolean' || isNaN(id))) {
+  if (id != null && (typeof id === 'boolean' || Number.isNaN(id))) {
     console.error(chalk.red('[×] Invalid app id'));
     return false;
   }
@@ -253,7 +253,7 @@ export function start(port, name) {
     .then(() => checkPort(port, name))
     .then(() => checkInitialized())
     .then(() => startJetty(port, name))
-    .then(pid => new Promise((resolve, reject) => {
+    .then((pid) => new Promise((resolve, reject) => {
       _.apps.save({
         name,
         port,
@@ -261,11 +261,11 @@ export function start(port, name) {
         status: 'online',
         pathname: CWD
       })
-      .then(resolve)
-      .catch((err) => {
-        err.pid = pid;
-        reject(err);
-      });
+        .then(resolve)
+        .catch((err) => {
+          err.pid = pid;
+          reject(err);
+        });
     }))
     .then(() => {
       let ip = _.ip();
@@ -365,7 +365,7 @@ export function remove(port, name, id) {
  */
 export function list() {
   _.readAppsFile()
-    .then(file => Promise.all(file.list.map((item) => {
+    .then((file) => Promise.all(file.list.map((item) => {
       if (item.status !== 'online') {
         return Promise.resolve(item);
       }

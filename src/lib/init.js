@@ -8,6 +8,7 @@ import cheerio from 'cheerio';
 import { pd } from 'pretty-data';
 import chalk from 'chalk';
 import del from 'del';
+import tar from 'tar';
 
 import * as _ from './helper';
 import * as questions from './questions';
@@ -48,13 +49,13 @@ function configureAbout($, answers) {
     const filterName = $item.children(FILTER_NAME_TAG).text();
 
     if (filterName === REWRITE_FILTER) {
-      $item.append(_.createXMLParams({
+      $item.append(tmpl.createXMLParams({
         routerFile: answers.router
       }));
     }
 
     if (filterName === MOCK_FILTER) {
-      $item.append(_.createXMLParams({
+      $item.append(tmpl.createXMLParams({
         mockDir: answers.mock
       }));
     }
@@ -79,7 +80,7 @@ function configureAbout($, answers) {
  * @param  {Object} answers
  */
 function initWebXML(answers) {
-  const engines = answers.engines;
+  const { engines } = answers;
 
   /**
    * 载入web.xml文件
@@ -110,33 +111,33 @@ function initWebXML(answers) {
       }
     }
 
-    _.untargz({
-      pack: VELOCITY_FILE,
-      target: LIB_PATH,
+    tar.extract({
+      file: VELOCITY_FILE,
+      cwd: LIB_PATH,
       strip: 1
     })
-    .then(() => {
-      let data = {
-        name: 'velocity',
-        extension: answers.vextension
-      };
+      .then(() => {
+        let data = {
+          name: 'velocity',
+          extension: answers.vextension
+        };
 
-      if (useTools) {
-        data.tools = answers.tools;
-      }
+        if (useTools) {
+          data.tools = answers.tools;
+        }
 
-      $(FILTER_MAPPING_TAG).last().after(tmpl.servlet(data));
+        $(FILTER_MAPPING_TAG).last().after(tmpl.servlet(data));
 
-      if (answers.template) {
-        answers.template = _.addLeadingSlash(answers.template);
-      }
+        if (answers.template) {
+          answers.template = _.addLeadingSlash(answers.template);
+        }
 
-      let vconf = tmpl.velocity(answers);
+        let vconf = tmpl.velocity(answers);
 
-      fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
-      fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] Velocity initialized is complete'));
-    });
+        fs.writeFileSync(VELOCITY_CONFIG_FILE, vconf);
+        fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
+        console.log(chalk.green('[√] Velocity initialized is complete'));
+      });
   }
 
   // 配置freemarker模板引擎
@@ -144,19 +145,19 @@ function initWebXML(answers) {
     let target = path.join(LIB_PATH, FREEMARKER_NAME);
 
     fs.createReadStream(FREEMARKER_FILE)
-    .pipe(fs.createWriteStream(target))
-    .on('close', () => {
-      let servlet = tmpl.servlet({
-        name: 'freemarker',
-        extension: answers.fextension,
-        tagSyntax: answers.tagSyntax,
-        template: answers.template
-      });
+      .pipe(fs.createWriteStream(target))
+      .on('close', () => {
+        let servlet = tmpl.servlet({
+          name: 'freemarker',
+          extension: answers.fextension,
+          tagSyntax: answers.tagSyntax,
+          template: answers.template
+        });
 
-      $(FILTER_MAPPING_TAG).last().after(servlet);
-      fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
-      console.log(chalk.green('[√] Freemarker initialized is complete'));
-    });
+        $(FILTER_MAPPING_TAG).last().after(servlet);
+        fs.writeFileSync(WEB_XML_PATH, pd.xml($.html()));
+        console.log(chalk.green('[√] Freemarker initialized is complete'));
+      });
   }
 }
 
@@ -196,13 +197,14 @@ function initProject(data) {
   if (exists(WEB_XML_PATH)) {
     console.warn(chalk.yellow('[i] WEB-INF directory already exists in the current directory, if you want to force initialize, do \'marmot init -f\''));
   } else {
-    _.untargz({
-      pack: MARMOT_INIT_FILE,
-      target: CWD
+    tar.extract({
+      file: MARMOT_INIT_FILE,
+      cwd: CWD,
+      strip: 0
     })
-    .then(() => {
-      initWebXML(answers);
-    });
+      .then(() => {
+        initWebXML(answers);
+      });
   }
 }
 
@@ -215,7 +217,7 @@ export default (command) => {
    * @param  {String} key
    * @return {Array}
    */
-  const remove = (arr, key) => arr.filter(item => item.name !== key);
+  const remove = (arr, key) => arr.filter((item) => item.name !== key);
 
   /**
    * 子问题
@@ -239,7 +241,7 @@ export default (command) => {
     if (subq.length > 0) {
       return inquirer
         .prompt(subq)
-        .then(subAnswers => Object.assign(answers, subAnswers));
+        .then((subAnswers) => Object.assign(answers, subAnswers));
     }
 
     return Promise.resolve(answers);
@@ -267,7 +269,7 @@ export default (command) => {
   // common questions
   if (questions.common.length > 0) {
     inquirer.prompt(questions.common)
-      .then(answers => subPrompt(answers.engines || config.engines, answers))
+      .then((answers) => subPrompt(answers.engines || config.engines, answers))
       .then(initProject);
 
   // freemarker and velocity questions

@@ -5,10 +5,11 @@ const ERROR = 2;
 
 module.exports = {
   parser: 'babel-eslint',
-  extends: 'airbnb',
+  extends: 'airbnb-base',
   rules: {
-    'no-console': OFF, // speical for the project
     'no-continue': OFF,
+    'no-console': OFF,
+    'no-control-regex': OFF,
     'consistent-return': OFF,
     'no-cond-assign': OFF,
     'no-plusplus': OFF,
@@ -19,10 +20,13 @@ module.exports = {
     'no-param-reassign': OFF,
     'no-return-assign': OFF,
     'comma-dangle': [ERROR, 'only-multiline'],
+    'no-underscore-dangle': ERROR,
+    'no-unused-vars': [ERROR, { args: 'after-used' }],
+    'no-empty': [ERROR, { allowEmptyCatch: true }],
     'import/no-extraneous-dependencies': OFF,
     'import/extensions': OFF,
     'import/no-unresolved': OFF,
-    'import/no-dynamic-require': OFF
+    'import/prefer-default-export': OFF
   },
   env: {
     node: true,

@@ -1,7 +1,6 @@
 
 import path from 'path';
 import fs from 'fs';
-import zlib from 'zlib';
 import os from 'os';
 // eslint-disable-next-line camelcase
 import child_process from 'child_process';
@@ -9,39 +8,12 @@ import child_process from 'child_process';
 import del from 'del';
 import iconv from 'iconv-lite';
 import chalk from 'chalk';
-import tar from 'tar';
 import mkdirp from 'mkdirp';
-import * as tmpl from './template';
 
 import {
   CONFIG_PATH,
   MARMOT_APPS_PATH
 } from './constants';
-
-/**
- * 解压tar.gz文件
- * @param {Object} opts
- * @param {String} opts.pack   tar.gz包的路径
- * @param {String} opts.target 解压到指定目录
- * @param {Number} opts.strip
- */
-export function untargz(opts) {
-  return new Promise((resolve, reject) => {
-    fs.createReadStream(opts.pack)
-      .pipe(zlib.createGunzip())
-      .pipe(tar.Extract({  // eslint-disable-line new-cap
-        path: opts.target,
-        strip: opts.strip || 0
-      }))
-      .on('error', (err) => {
-        if (err) console.error(chalk.red('[×] %s'), err.message);
-        reject(err);
-      })
-      .on('end', () => {
-        resolve();
-      });
-  });
-}
 
 /**
  * 读取marmot的配置文件
@@ -175,24 +147,6 @@ export function printTable(table = {
 }
 
 /**
- * 创建web.xml格式的参数配置
- * @param  {Object} params 参数表
- * @return {String}
- */
-export function createXMLParams(params) {
-  let fragment = '';
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (let key in params) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (params.hasOwnProperty(key)) {
-      fragment += tmpl.createParam(key, params[key]);
-    }
-  }
-  return fragment;
-}
-
-/**
  * 读取apps文件, 返回一个plain object
  * @return {Object}
  */
@@ -283,7 +237,7 @@ export function getProcessByPid(pid) {
           out = out.toString();
         }
 
-        let rows = out.split(os.EOL).filter(row => row && row.trim() !== '');
+        let rows = out.split(os.EOL).filter((row) => row && row.trim() !== '');
         resolve(rows.length >= 2 ? rows[1] : '');
       }
     });
@@ -341,8 +295,10 @@ export const apps = Object.freeze({
         let appList = file.list;
 
         for (let i = 0, item; item = options[i++];) {
-          let { name, port, pid, status, pathname } = item;
-          let app = appList.find(p => p.name === item.name);
+          let {
+            name, port, pid, status, pathname
+          } = item;
+          let app = appList.find((p) => p.name === item.name);
 
           if (app) {
             app.port = port;
@@ -393,9 +349,9 @@ export const apps = Object.freeze({
 
           for (let j = 0, app; app = appList[j++];) {
             if (
-              app.name === name ||
-              app.port === port ||
-              app.id === id
+              app.name === name
+              || app.port === port
+              || app.id === id
             ) {
               ret.push(app);
             }
@@ -432,9 +388,9 @@ export const apps = Object.freeze({
             let app = appList[j];
 
             if (
-              app.name === name ||
-              app.port === port ||
-              app.id === id
+              app.name === name
+              || app.port === port
+              || app.id === id
             ) {
               names.push(app.name);
               appList.splice(j, 1);

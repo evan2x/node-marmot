@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.5
+
+* 修复java-marmot的空指针异常错误 
+
 # 0.6.4
 
 * 废弃provider属性，请使用proxy代替
