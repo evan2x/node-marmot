@@ -42,7 +42,7 @@
     "inquirer": "^3.0.6",
     "mkdirp": "^0.5.1",
     "pretty-data": "^0.40.0",
-    "tar": "^2.2.1"
+    "tar": "^5.0.5"
   },
   "engines": {
     "node": ">=4.0"
