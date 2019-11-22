@@ -1,6 +1,6 @@
 {
   "name": "marmot",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "A mock server of the Java platform",
   "bin": {
     "marmot": "bin/marmot.js"
