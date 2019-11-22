@@ -1,5 +1,10 @@
 # Marmot ChangeLog
 
+# 0.6.4
+
+* 废弃provider属性，请使用proxy代替
+* 修复routes标签中设置的proxy属性会传递到同级元素的下一个routes标签的问题
+
 # 0.6.3
 
 * 修复个别情况下marmot解析应用配置异常的问题

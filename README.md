@@ -235,10 +235,10 @@ $ marmot server ls
   <import src="product.xml" />
   <routes>
     <route rule="/" location="/index.vm" />
-    <route rule="/api/v1/user.json" provider="http://127.0.0.1:3000" />
-    <route rule="/user/center" content-type="text/html" provider="http://xxx.xxx.xxx" />
+    <route rule="/api/v1/user.json" proxy="http://127.0.0.1:3000" />
+    <route rule="/user/center" content-type="text/html" proxy="http://xxx.xxx.xxx" />
   </routes>
-  <routes provider="...">
+  <routes proxy="...">
     <route rule="...">
     <!-- ... -->
   </routes>
@@ -257,11 +257,13 @@ $ marmot server ls
 
 `router` 标签是路由入口文件的根元素，使用 `import`标签引入的其他路由文件则不需要使用此标签。
 
-#### `provider` 属性
+#### `proxy` 属性
 
-该属性作用于整个路由文件中，`provider` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 应用的协议作为缺省值。
+**原为provider属性，该属性仍然可用，但推荐使用proxy**
 
-由 `Marmot` 通过 `provider` 转发的请求，Request Headers中会包含 `X-Requested-With: MarmotHttpRequest` 字段。
+该属性作用于整个路由文件中，`proxy` 指向一个可访问的IP/域名，其作用为当规则被命中后，当前请求将被**转发**到该IP/域名，此属性的值必须是一个有效的IP/域名，如果不写协议类型，那么将以当前启动的 `Marmot` 应用的协议作为缺省值。
+
+由 `Marmot` 通过 `proxy` 转发的请求，Request Headers中会包含 `X-Requested-With: MarmotHttpRequest` 字段。
 
 有效的HTTP地址：
 
@@ -276,7 +278,7 @@ xxx.xxx.xxx
 示例：
 
 ```xml
-<router provider="http://x.x.x.x:3000">
+<router proxy="http://x.x.x.x:3000">
   <routes>
     <route rule="/user/info.json" />
   </routes>
@@ -384,15 +386,17 @@ router/
 
 **原为 `route-map` 标签，目前不建议使用，0.7.0 版本中将被移除。**
 
-#### `provider` 属性
+#### `proxy` 属性
 
-该属性与 `router` 标签上的 `provider` 是一样的，不同的是只作用于 `routes` 下的路由规则。若 `router` 和 `routes` 同时指定 `provider` ，则优先使用 `routes` 的 `provider`。
+**原为provider属性，该属性仍然可用，但推荐使用proxy**
+
+该属性与 `router` 标签上的 `proxy` 是一样的，不同的是只作用于 `routes` 下的路由规则。若 `router` 和 `routes` 同时指定 `proxy` ，则优先使用 `routes` 的 `proxy`。
 
 示例:
 
 ```xml
-<router provider="http://x.x.x.x:8888">
-  <routes provider="http://x.x.x.x:3002">
+<router proxy="http://x.x.x.x:8888">
+  <routes proxy="http://x.x.x.x:3002">
     <route rule="/user/info.json" />
   </routes>
   <routes>
@@ -455,7 +459,7 @@ http://127.0.0.0:8080/foo/bar/baz.html
 
 #### `redirect` 属性
 
-针对命中的路由进行重定向，**会忽略其他属性如：`location, provider, content-type`**
+针对命中的路由进行重定向，**会忽略其他属性如：`location, proxy, content-type`**
 
 ```xml
 <route rule="/xxx" redirect="/aaa">
@@ -474,15 +478,17 @@ http://127.0.0.0:8080/foo/bar/baz.html
 <route rule="/xxx" target="xxx.vm">
 ```
 
-#### `provider` 属性
+#### `proxy` 属性
 
-与 `router/routes` 中的 `provider` 功能一样，都是将当前命中规则的请求转发到指定的地址，唯一不同的是改属性存在于`route`标签中的话，其作用仅针对于当前规则。
+**原为provider属性，该属性仍然可用，但推荐使用proxy**
+
+与 `router/routes` 中的 `proxy` 功能一样，都是将当前命中规则的请求转发到指定的地址，唯一不同的是改属性存在于`route`标签中的话，其作用仅针对于当前规则。
 
 示例：
 
 ```xml
-<routes provider="http://www.a.com">
-  <route rule="/foo.json" provider="http://www.b.com" />
+<routes proxy="http://www.a.com">
+  <route rule="/foo.json" proxy="http://www.b.com" />
 </routes>
 <!-- 最终的转发地址将会是: http://www.b.com/test.json -->
 ```
@@ -491,14 +497,14 @@ http://127.0.0.0:8080/foo/bar/baz.html
 
 该属性用于指定当前规则命中后的响应内容类型。
 
-**值得注意的是如果你在使用 `provider` 提供的数据渲染本地模板的时候，`content-type` 必须设置为 `text/html` 或 `text/htm`，否则将会直接显示 `provider` 响应的内容**
+**值得注意的是如果你在使用 `proxy` 提供的数据渲染本地模板的时候，`content-type` 必须设置为 `text/html` 或 `text/htm`，否则将会直接显示 `proxy` 响应的内容**
 
 示例：
 
 路由规则配置:
 
 ```xml
-<route rule="/index" content-type="text/html" provider="http://127.0.0.1:3000">
+<route rule="/index" content-type="text/html" proxy="http://127.0.0.1:3000">
 ```
 
 本地 `Marmot` 启动端口为 `8080`
@@ -507,7 +513,7 @@ http://127.0.0.0:8080/foo/bar/baz.html
 访问地址：
 http://127.0.0.1:8080/index
 
-规则命中，使用provider转发后的地址
+规则命中，使用proxy转发后的地址
 http://127.0.0.1:3000/index
 
 ```
@@ -552,7 +558,7 @@ velocity模板如下：
 数据模拟主要分两类：
 
 1. 本地数据模拟
-2. 使用provider来访问其他服务提供的模拟数据，如：本地启动的express模拟数据或者测试服务器提供的数据
+2. 使用proxy来访问其他服务提供的模拟数据，如：本地启动的express模拟数据或者测试服务器提供的数据
 
 ### 本地数据模拟
 
@@ -691,14 +697,14 @@ JSP：
 
 #### 模板数据模拟
 
-之前介绍过 `provider` 属性的作用，其作用就是将命中的路由转发给`provider`指定的IP/域名。
+之前介绍过 `proxy` 属性的作用，其作用就是将命中的路由转发给`proxy`指定的IP/域名。
 
 以下为使用Marmot及express来演示一个由Node.js提供数据模拟服务的栗子：
 
 **Marmot路由配置：**
 
 ```xml
-<route rule="/index.html" render-template="/index.vm" provider="http://127.0.0.1:3000">
+<route rule="/index.html" render-template="/index.vm" proxy="http://127.0.0.1:3000">
 ```
 
 Node.js服务的入口 **app.js**
@@ -755,13 +761,13 @@ velocity模板 `/index.vm`
 
 **注意：**
 
-1. 如果路由中没有指定 `content-type` 属性，则不会渲染模板，而是将 `provider` (以上例子中即express服务)响应的结果提供给客户端。
+1. 如果路由中没有指定 `content-type` 属性，则不会渲染模板，而是将 `proxy` (以上例子中即express服务)响应的结果提供给客户端。
 2. express中的 `/index.html` 路由返回了一个JSON格式的数据，Marmot会将其绑定到模板上。
 
 #### REST API 模拟数据
 
 ```xml
-<route rule="/users.json" provider="http://127.0.0.1:3000">
+<route rule="/users.json" proxy="http://127.0.0.1:3000">
 ```
 
-当路由命中后，Marmot直接将请求转发给 `provider`，返回结果由 `provider` 决定。当用于REST API的时候，通常是返回JSON字符串。
+当路由命中后，Marmot直接将请求转发给 `proxy`，返回结果由 `proxy` 决定。当用于REST API的时候，通常是返回JSON字符串。
