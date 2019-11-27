@@ -13,6 +13,8 @@ import {
   WEB_XML_PATH
 } from './constants';
 
+let isRestart = false;
+
 /**
  * 检测是否安装Java
  * @return {Promise}
@@ -249,7 +251,7 @@ export function start(port, name) {
   }
 
   return resolver
-    .then(checkJava)
+    .then(isRestart ? null : checkJava)
     .then(() => checkPort(port, name))
     .then(() => checkInitialized())
     .then(() => startJetty(port, name))
@@ -303,7 +305,10 @@ export function stop(port, name, id) {
     name = correctName(name);
   }
 
-  return checkJava()
+  const resolver = Promise.resolve();
+
+  return resolver
+    .then(isRestart ? null : checkJava)
     .then(() => stopJetty(port, name, id))
     .then((nameList) => {
       if (nameList.length) {
@@ -325,7 +330,12 @@ export function stop(port, name, id) {
  * @param  {Number} id
  */
 export function restart(...args) {
-  return stop(...args).then(start(...args));
+  isRestart = true;
+
+  return Promise.resolve()
+    .then(checkJava)
+    .then(() => stop(...args))
+    .then(() => start(...args))
 }
 
 /**

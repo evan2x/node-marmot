@@ -1,5 +1,11 @@
 # Marmot ChangeLog
 
+# 0.6.6
+
+* 修复执行`restart`命令时的异常错误
+* 修复velocity模版引入外部macro文件后再次修改macro内容时无法生效的问题
+* 移除全局宏的配置项，直接使用#parse指令引入macro即可
+
 # 0.6.5
 
 * 修复java-marmot的空指针异常错误 

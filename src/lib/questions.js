@@ -71,19 +71,6 @@ export const velocity = [
 
       return true;
     }
-  },
-  {
-    name: 'macro',
-    message(answers) {
-      return `File paths of velocity global macro(must be '${answers.vextension}' file with comma-separated):`;
-    },
-    type: 'input',
-    validate(value, answers) {
-      if (value.trim() !== '' && !value.endsWith(answers.vextension)) {
-        return `You need to provide one or more file paths with ${answers.vextension} extension`;
-      }
-      return true;
-    }
   }
 ];
 

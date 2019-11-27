@@ -50,15 +50,10 @@ webapp.resource.loader.class = org.apache.velocity.tools.view.WebappResourceLoad
 webapp.resource.loader.path = ${params.template}
 webapp.resource.loader.cache = false
 webapp.resource.loader.modificationCheckInterval = 0
-tools.view.servlet.layout.directory = /`
-  );
-
-  if (params.macro) {
-    velocityProps += `
-velocimacro.library = ${params.macro}
+tools.view.servlet.layout.directory = /
 velocimacro.library.autoreload = true
-    `;
-  }
+velocimacro.permissions.allow.inline.to.replace.global = true`
+  );
 
   return velocityProps;
 }
