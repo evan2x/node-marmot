@@ -1,5 +1,9 @@
 # Marmot ChangeLog
 
+# 0.6.7
+
+* 使用JDK 7重新构建java-marmot
+
 # 0.6.6
 
 * 修复执行`restart`命令时的异常错误
