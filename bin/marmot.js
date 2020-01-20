@@ -1,11 +1,28 @@
 #!/usr/bin/env node
 
-import 'babel-polyfill';
-import program from 'commander';
-import pkg from '../package.json';
+const program = require('commander');
+const pkg = require('../package.json');
+const init = require('../lib/init');
+const server = require('../lib/server');
 
-import init from '../lib/init';
-import * as server from '../lib/server';
+/**
+ * extract options into a plain object.
+ * @param {Object} cmd
+ * @return {Object}
+ */
+function extractArgs(cmd) {
+  const args = {};
+
+  cmd.options.forEach((option) => {
+    const key = option.long.replace(/^--/, '');
+
+    if (typeof cmd[key] !== 'function' && cmd[key] != null) {
+      args[key] = cmd[key];
+    }
+  });
+
+  return args;
+}
 
 program
   .usage('<command>')
@@ -20,13 +37,13 @@ program
     console.log('    Forced to initialize the project:');
     console.log('    $ marmot init -f');
     console.log('');
-    console.log('    start the server on the port 8090:');
+    console.log('    Start the webapp on the port 8090:');
     console.log('    $ marmot server start -p 8090');
     console.log('');
-    console.log('    stop the server:');
+    console.log('    Stop the webapp:');
     console.log('    $ marmot server stop');
     console.log('');
-    console.log('    list all services:');
+    console.log('    List all webapp:');
     console.log('    $ marmot server list');
   });
 
@@ -34,32 +51,32 @@ program
 program
   .command('init')
   .usage('<command> [options]')
-  .description('init project')
-  .option('-f, --force', 'forced to initialize WEB-INF directory of the current project')
+  .description('init webapp')
+  .option('-f, --force', 'forced to initialize WEB-INF directory of the current webapp')
   .action(init);
 
 // server command
 const commander = program
   .command('server')
   .usage('<command> [options]')
-  .option('-p, --port [port]', 'specify the port used to start, restart, stop, delete the service (default: 8080)', parseInt)
-  .option('-i, --id [id]', 'specify the service id used to start, restart, stop, delete the service', parseInt)
-  .option('-a, --app [app]', 'specify the app name used to start, restart, stop, delete the service, (default: the current directory name)', /^[^/\\:*?<>|"'[\]$+&%#!~`]+$/)
+  .option('-p, --port [port]', 'start, stop or remove the webapp by specifying the port (default: 8080)', parseInt)
+  .option('-i, --id [id]', 'stop or remove the webapp by specifying the id', parseInt)
   .description('a embedded jetty server')
   .action((...args) => {
-    let cmd = args[args.length - 1];
+    const cmd = args[args.length - 1];
+    const options = extractArgs(cmd);
 
     switch (args[0]) {
       case 'start':
-        server.start(cmd.port, cmd.app);
+        server.start(options.port);
         break;
 
       case 'stop':
-        server.stop(cmd.port, cmd.app, cmd.id);
+        server.stop(options);
         break;
 
       case 'restart':
-        server.restart(cmd.port, cmd.app, cmd.id);
+        server.restart();
         break;
 
       case 'list':
@@ -69,35 +86,36 @@ const commander = program
 
       case 'remove':
       case 'rm':
-        server.remove(cmd.port, cmd.app, cmd.id);
+        server.remove(options);
         break;
 
       default:
         cmd.outputHelp();
     }
   });
+
 // server sub-command
 commander
   .command('start')
-  .description('start a jetty service');
+  .description('start a jetty server');
 
 commander
   .command('restart')
-  .description('restart a jetty service');
+  .description('restart a jetty server');
 
 commander
   .command('stop')
-  .description('stop a jetty service');
+  .description('stop a jetty server');
 
 commander
   .command('remove')
   .alias('rm')
-  .description('remove and stop the service from the services list');
+  .description('remove and stop the webapp from the webapps list');
 
 commander
   .command('list')
   .alias('ls')
-  .description('list of all services');
+  .description('list of all webapps');
 
 commander.command('');
 

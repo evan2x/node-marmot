@@ -4,9 +4,8 @@
 
 一个Java平台的Mock Server
 
-## 标签库与模板引擎
+## 模板引擎
 
-* JSP/JSTL/EL (默认支持)
 * Velocity
 * Freemarker
 
@@ -41,22 +40,9 @@ $ npm install -g marmot
 $ marmot init
 ```
 
-> 项目下如果存在 `.marmotrc` 配置文件，那么会根据文件中的配置进行初始化，如果不存在 `.marmotrc` 配置文件，执行后会出现问答式的初始化设置，并会生成一个 `.marmotrc` 配置文件
+> 项目下如果存在 `.marmotrc` 配置文件，那么会根据文件中的配置进行初始化，如果不存在 `.marmotrc` 配置文件，执行后会出现问答式的初始化设置，并会生成一个 `.marmotrc` 配置文件。
 
 * `marmot init` 主要生成了项目的 `WEB-INF` 目录所需要的jar包及模板引擎的配置。
-
-* 如果您手动删除了 `WEB-INF` 目录，您需要再次运行 `marmot init` 进行项目初始化。
-当你要指定一个或多个全局的宏文件时，请修改 `.marmotrc` 配置中的 `macro` 属性，然后重新执行 `marmot init -f` 命令，**该属性当指定多个宏文件的时候用逗号分割，宏文件的路径时相对于指定的模版目录** 如：  
-
-  ```
-  #...
-  "template": "views/",
-  "macro": "common/widget.vm,common/global.vm"
-  #...
-
-  # 以上的宏查找方式的结果时 views/common/widget.vm / views/common/global.vm
-  ```
-
 * 由于 `WEB-INF` 目录是根据 `.marmotrc` 配置文件生成的，所以您在提交代码的时候，无需提交此目录。
 
 参数：
@@ -71,12 +57,11 @@ $ marmot init
 $ marmot server <command>
 ```
 
-**在启动多个应用的时候，应用名称及端口号是不可以重复的**
-
-server 目前一共有4个命令，分别为:
+server 目前一共有五个命令，分别为:
 
 * 启动应用 `marmot server start`
-* 关闭应用 `marmot server stop`
+* 停止应用 `marmot server stop`
+* 重启应用 `marmot server restart`
 * 从应用列表中移除应用 `marmot server remove`
 * 显示所有应用列表 `marmot server list`
 
@@ -88,123 +73,72 @@ server 目前一共有4个命令，分别为:
 $ marmot server start
 ```
 
-初次启动时如果没有指定端口号，则默认为 `8080` ，若指定了端口号则以指定的端口号启动。**当第二次启动的时候，如果没有指定端口号则默认为上次启动时使用的端口号。**
-
 参数：
+* `-p, --port` 应用端口
 
-- `-p, --port` 用于指定应用启动时所使用的端口
-- `-a, --app` 指定应用名，默认会使用当前所在的目录名。
+初次启动时如果没有指定端口号，则默认为 `8080` ，若指定了端口号则以指定的端口号启动。  
+**当第二次启动的时候，如果没有指定端口号则默认为上次启动时使用的端口号。**
 
 ##### 示例
 
-当前终端所在目录为：`/Users/evan/projects/cashier`
-
-示例1:
-
 ```shell
+# 启动服务并指定端口为8090
 $ marmot server start -p 8090
 ```
 
-执行以上命令后，应用名为`cashier` ，端口号为 `8080`
-
-示例2:
+#### 停止应用
 
 ```shell
-$ marmot server start -a cashier-project -p 8009
+$ marmot server stop
 ```
 
-执行以上命令后，应用名为`cashier-project`，端口号为`8009`
-
-#### 关闭应用
-
-```shell
-$ marmot server stop -p <port>
-```
-
-参数:
-
-* `-p, --port` 根据端口关闭对应的应用
-* `-a, --app` 根据应用名称关闭对应的应用
-* `-i, --id` 根据应用ID关闭对应的应用，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
+参数：
+* `-p, --port` 应用端口
+* `-i, --id` 应用ID，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
 
 ##### 示例
 
-> 关闭应用时，至少需要指定任意一个参数。
-
-示例1:
-
 ```shell
+# 通过端口停止应用
 $ marmot server stop -p 8090
-```
 
-关闭 `8090` 端口所对应的应用
-
-示例2:
-
-```shell
-$ marmot server stop -n cashier-project
-```
-
-关闭名称为 `cashier-project` 的应用
-
-示例3:
-
-```shell
+# 通过id停止应用
 $ marmot server stop -i 1
 ```
 
-关闭ID为 `1` 的应用
+#### 重启应用
+
+```shell
+$ marmot server restart
+```
 
 #### 移除应用
 
 ```shell
-$ marmot server remove -p <port>
-# or
-$ marmot server rm -p <port>
+$ marmot server remove
 ```
 
-> `remove` 的别名为 `rm`
+参数：
+* `-p, --port` 应用端口
+* `-i, --id` 应用ID，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
 
-参数:
-
-- `-p, --port` 根据端口移除对应的应用
-- `-a, --app` 根据应用名称移除对应的应用
-- `-i, --id` 根据应用ID关闭对应的应用，该ID是由初次启动应用时生成的ID。可使用`list`命令查看
+> `remove` 的别名为 `rm`  
+> **注意：移除应用时，至少需要指定任意一个参数**
 
 ##### 示例
 
-> 移除应用时，至少需要指定任意一个参数
-
-示例1:
-
 ```shell
+# 通过端口停止应用
 $ marmot server rm -p 8090
-```
 
-移除 `8090` 端口所对应的应用
-
-示例2:
-
-```shell
-$ marmot server rm -n cashier-project
-```
-
-移除名称为 `cashier-project` 的应用
-
-示例3:
-
-```shell
+# 通过ID停止应用
 $ marmot server rm -i 1
 ```
-
-移除ID为 `1` 的应用
 
 #### 显示所有应用列表
 
 ```shell
 $ marmot server list
-# or
-$ marmot server ls
 ```
 
 > `list` 的别名为 `ls`
@@ -212,11 +146,11 @@ $ marmot server ls
 以上命令将输出如下列表。
 
 ```
-┌──────┬───────────┬────────┬─────────┬──────────┬────────────────────────────────┐
-│  id  │  name     │  port  │  pid    │  status  │  path                          │
-├──────┼───────────┼────────┼─────────┼──────────┼────────────────────────────────┤
-│  1   │  cashier  │  8090  │  10067  │  online  │  /Users/evan/projects/cashier  │
-└──────┴───────────┴────────┴─────────┴──────────┴────────────────────────────────┘
+┌──────┬─────────────────────────┬────────┬────────┬──────────┬────────────────────────────────┐
+│  id  │  domain                 │  port  │  pid   │  status  │  pathname                      │
+├──────┼─────────────────────────┼────────┼────────┼──────────┼────────────────────────────────┤
+│  12  │  http://127.0.0.1:8080  │  8080  │  9088  │  online  │  /Users/evan/projects/cashier  │
+└──────┴─────────────────────────┴────────┴────────┴──────────┴────────────────────────────────┘
 ```
 
 ## 路由配置
@@ -251,7 +185,7 @@ $ marmot server ls
 </routes>
 ```
 
-在路由的配置中有 `router`、 `import`、`cookies`、`cookie`、`routes`、`route` 六种标签(不包括 `xml` 声明)，接下来将逐一介绍其功能
+在路由的配置中有 `router`、 `import`、`cookies`、`cookie`、`routes`、`route` 6种标签(不包括 `xml` 声明)，接下来将逐一介绍其功能
 
 ### `router` 标签
 

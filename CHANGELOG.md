@@ -1,5 +1,10 @@
 # Marmot ChangeLog
 
+# 1.0.0-alpha.0
+
+* 不再支持通过应用名操作对应的服务
+* 移除`server`命令下的 `-a, --app`参数
+
 # 0.6.7
 
 * 使用JDK 7重新构建java-marmot

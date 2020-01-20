@@ -1,8 +1,4 @@
 .DS_Store
-.services.json
 npm-debug.log
 node_modules/
-/lib/
-/bin/
-/test/
-/logs
+logs/

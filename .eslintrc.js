@@ -4,7 +4,6 @@ const WARN = 1;
 const ERROR = 2;
 
 module.exports = {
-  parser: 'babel-eslint',
   extends: 'airbnb-base',
   rules: {
     'no-continue': OFF,
